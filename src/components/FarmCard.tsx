@@ -4,10 +4,10 @@ import { Badge } from '@/components/ui/badge';
 import { Thermometer, Droplets, Wind, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface SensorData {
-  temperature: number;
-  moisture: number;
-  ammonia: number;
-  lastUpdate: Date;
+  temperature?: number;
+  moisture?: number;
+  ammonia?: number;
+  lastUpdate?: string | Date;
 }
 
 interface FarmCardProps {
@@ -16,56 +16,65 @@ interface FarmCardProps {
   data: SensorData;
 }
 
-const formatNumber = (value: number | undefined | null, unit: string) => {
-  return typeof value === 'number' ? `${value.toFixed(1)}${unit}` : '—';
-};
+// Helper untuk format angka secara aman
+const formatNumber = (value: number | undefined, unit: string) =>
+  typeof value === 'number' ? `${value.toFixed(1)}${unit}` : '—';
 
-const getStatusColor = (value: number, type: 'temperature' | 'moisture' | 'ammonia') => {
+// Dapatkan warna status berdasarkan rentang
+const getStatusColor = (value: number | undefined, type: 'temperature' | 'moisture' | 'ammonia') => {
+  if (typeof value !== 'number') return 'destructive';
   const ranges = {
-    temperature: { min: 18, max: 25, unit: '°C' },
-    moisture: { min: 45, max: 65, unit: '%' },
-    ammonia: { min: 0, max: 20, unit: 'ppm' }
-  };
+    temperature: { min: 18, max: 25 },
+    moisture:    { min: 45, max: 65 },
+    ammonia:     { min: 0,  max: 20 }
+  }[type];
 
-  const range = ranges[type];
-  if (value >= range.min && value <= range.max) {
-    return 'success';
-  } else if (
-    (value >= range.min - 3 && value < range.min) ||
-    (value > range.max && value <= range.max + 3)
-  ) {
-    return 'warning';
-  } else {
-    return 'danger';
-  }
+  if (value >= ranges.min && value <= ranges.max) return 'success';
+  if (
+    (value >= ranges.min - 3 && value < ranges.min) ||
+    (value > ranges.max && value <= ranges.max + 3)
+  ) return 'warning';
+  return 'destructive';
 };
 
+// Icon sensor
 const getSensorIcon = (type: 'temperature' | 'moisture' | 'ammonia') => {
   switch (type) {
-    case 'temperature':
-      return <Thermometer className="h-4 w-4" />;
-    case 'moisture':
-      return <Droplets className="h-4 w-4" />;
-    case 'ammonia':
-      return <Wind className="h-4 w-4" />;
+    case 'temperature': return <Thermometer className="h-4 w-4" />;
+    case 'moisture':    return <Droplets    className="h-4 w-4" />;
+    case 'ammonia':     return <Wind        className="h-4 w-4" />;
   }
 };
 
-const StatusIcon = ({ status }: { status: string }) => {
-  if (status === 'success') return <CheckCircle className="h-4 w-4 text-success" />;
-  return <AlertTriangle className="h-4 w-4 text-warning" />;
-};
+// Icon overall status
+const StatusIcon = ({ status }: { status: 'success' | 'warning' | 'destructive' }) =>
+  status === 'success'
+    ? <CheckCircle    className="h-4 w-4 text-success" />
+    : <AlertTriangle  className="h-4 w-4 text-warning" />;
 
-export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) => {
-  const tempStatus = getStatusColor(data.temperature, 'temperature');
-  const moistureStatus = getStatusColor(data.moisture, 'moisture');
-  const ammoniaStatus = getStatusColor(data.ammonia, 'ammonia');
+export const FarmCard: React.FC<FarmCardProps> = ({ farmName, data }) => {
+  const tempStatus     = getStatusColor(data.temperature, 'temperature');
+  const moistureStatus = getStatusColor(data.moisture,    'moisture');
+  const ammoniaStatus  = getStatusColor(data.ammonia,     'ammonia');
 
-  const overallStatus = [tempStatus, moistureStatus, ammoniaStatus].some(s => s === 'danger') 
-    ? 'danger' 
-    : [tempStatus, moistureStatus, ammoniaStatus].some(s => s === 'warning')
-    ? 'warning'
-    : 'success';
+  // Overall: any destructive→destructive, else any warning→warning, else success
+  const overallStatus: 'success' | 'warning' | 'destructive' =
+    [tempStatus, moistureStatus, ammoniaStatus].includes('destructive')
+      ? 'destructive'
+      : [tempStatus, moistureStatus, ammoniaStatus].includes('warning')
+        ? 'warning'
+        : 'success';
+
+  // Format lastUpdate dengan aman
+  let formattedTime = '—';
+  if (data.lastUpdate) {
+    const dt = typeof data.lastUpdate === 'string'
+      ? new Date(data.lastUpdate)
+      : data.lastUpdate;
+    if (!isNaN(dt.getTime())) {
+      formattedTime = dt.toLocaleTimeString();
+    }
+  }
 
   return (
     <Card className="hover:shadow-farm transition-all duration-300 transform hover:scale-[1.02]">
@@ -76,16 +85,22 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
           </CardTitle>
           <div className="flex items-center gap-2">
             <StatusIcon status={overallStatus} />
-            <Badge 
-              variant={overallStatus === 'success' ? 'default' : overallStatus === 'warning' ? 'secondary' : 'destructive'}
+            <Badge
+              variant={
+                overallStatus === 'success'     ? 'default' :
+                overallStatus === 'warning'     ? 'secondary' :
+                                                  'destructive'
+              }
               className="text-xs"
             >
-              {overallStatus === 'success' ? 'Optimal' : overallStatus === 'warning' ? 'Warning' : 'Critical'}
+              {overallStatus === 'success'     ? 'Optimal' :
+               overallStatus === 'warning'     ? 'Warning' :
+                                                 'Critical'}
             </Badge>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Temperature */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-temperature bg-opacity-10">
@@ -95,8 +110,12 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold">{formatNumber(data.temperature, '°C')}</span>
-            <Badge 
-              variant={tempStatus === 'success' ? 'default' : tempStatus === 'warning' ? 'secondary' : 'destructive'}
+            <Badge
+              variant={
+                tempStatus === 'success' ? 'default' :
+                tempStatus === 'warning' ? 'secondary' :
+                                           'destructive'
+              }
               className="text-xs"
             >
               {tempStatus}
@@ -112,8 +131,12 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold">{formatNumber(data.moisture, '%')}</span>
-            <Badge 
-              variant={moistureStatus === 'success' ? 'default' : moistureStatus === 'warning' ? 'secondary' : 'destructive'}
+            <Badge
+              variant={
+                moistureStatus === 'success' ? 'default' :
+                moistureStatus === 'warning' ? 'secondary' :
+                                              'destructive'
+              }
               className="text-xs"
             >
               {moistureStatus}
@@ -129,8 +152,12 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold">{formatNumber(data.ammonia, ' ppm')}</span>
-            <Badge 
-              variant={ammoniaStatus === 'success' ? 'default' : ammoniaStatus === 'warning' ? 'secondary' : 'destructive'}
+            <Badge
+              variant={
+                ammoniaStatus === 'success' ? 'default' :
+                ammoniaStatus === 'warning' ? 'secondary' :
+                                             'destructive'
+              }
               className="text-xs"
             >
               {ammoniaStatus}
@@ -140,7 +167,7 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
 
         {/* Last Update */}
         <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-          Last updated: {data.lastUpdate ? new Date(data.lastUpdate).toLocaleTimeString() : '—'}
+          Last updated: {formattedTime}
         </div>
       </CardContent>
     </Card>
