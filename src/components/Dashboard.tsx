@@ -31,6 +31,7 @@ const fetchSensorData = async (location: string): Promise<SensorData> => {
   try {
     const res = await fetch(`${API_BASE_URL}/api/kandang/${location.replace(' ', '_')}`);
     const json = await res.json();
+    console.log('RAW PAYLOAD FOR', location, json);
 
     return {
       temperature: json.data.temperature,
