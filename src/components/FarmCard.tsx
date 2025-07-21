@@ -16,6 +16,10 @@ interface FarmCardProps {
   data: SensorData;
 }
 
+const formatNumber = (value: number | undefined | null, unit: string) => {
+  return typeof value === 'number' ? `${value.toFixed(1)}${unit}` : '—';
+};
+
 const getStatusColor = (value: number, type: 'temperature' | 'moisture' | 'ammonia') => {
   const ranges = {
     temperature: { min: 18, max: 25, unit: '°C' },
@@ -90,7 +94,7 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
             <span className="font-medium text-sm">Temperature</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{data.temperature.toFixed(1)}°C</span>
+            <span className="text-lg font-bold">{formatNumber(data.temperature, '°C')}</span>
             <Badge 
               variant={tempStatus === 'success' ? 'default' : tempStatus === 'warning' ? 'secondary' : 'destructive'}
               className="text-xs"
@@ -107,7 +111,7 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
             <span className="font-medium text-sm">Moisture</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{data.moisture.toFixed(1)}%</span>
+            <span className="text-lg font-bold">{formatNumber(data.moisture, '%')}</span>
             <Badge 
               variant={moistureStatus === 'success' ? 'default' : moistureStatus === 'warning' ? 'secondary' : 'destructive'}
               className="text-xs"
@@ -124,7 +128,7 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
             <span className="font-medium text-sm">Ammonia</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold">{data.ammonia.toFixed(1)} ppm</span>
+            <span className="text-lg font-bold">{formatNumber(data.ammonia, ' ppm')}</span>
             <Badge 
               variant={ammoniaStatus === 'success' ? 'default' : ammoniaStatus === 'warning' ? 'secondary' : 'destructive'}
               className="text-xs"
@@ -136,7 +140,7 @@ export const FarmCard: React.FC<FarmCardProps> = ({ farmId, farmName, data }) =>
 
         {/* Last Update */}
         <div className="text-xs text-muted-foreground text-center pt-2 border-t">
-          Last updated: {data.lastUpdate.toLocaleTimeString()}
+          Last updated: {data.lastUpdate ? new Date(data.lastUpdate).toLocaleTimeString() : '—'}
         </div>
       </CardContent>
     </Card>
