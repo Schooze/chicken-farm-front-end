@@ -28,7 +28,7 @@ const generateSensorData = (): SensorData => ({
 
 const fetchSensorData = async (location: string): Promise<SensorData> => {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/kandang/${location.replace(" ", "_")}`);
+    const res = await fetch(`http://192.168.100.30:8000/api/kandang/${location.replace(" ", "_")}`);
     const json = await res.json();
 
     return {
