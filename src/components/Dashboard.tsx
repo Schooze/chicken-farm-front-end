@@ -29,7 +29,7 @@ const generateSensorData = (): SensorData => ({
 
 const fetchSensorData = async (location: string): Promise<SensorData> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/kandang/${location}`);
+    const res = await fetch(`${API_BASE_URL}/api/kandang/${location.replace(' ', '_')}`);
     const json = await res.json();
 
     return {
