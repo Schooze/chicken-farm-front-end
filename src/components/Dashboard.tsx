@@ -1,173 +1,126 @@
-import API_BASE_URL from '../config';
 import React, { useState, useEffect } from 'react';
-import { FarmCard } from './FarmCard';
-import { Button } from '@/components/ui/button';
+import API_BASE_URL from '../config';
+import { FarmCard }      from './FarmCard';
+import { Button }        from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Badge }         from '@/components/ui/badge';
 import { RefreshCw, Settings, Activity, AlertTriangle } from 'lucide-react';
 
-interface SensorData {
+export interface SensorData {
   temperature: number;
-  moisture: number;
-  ammonia: number;
-  lastUpdate: Date;
+  moisture:    number;
+  ammonia:     number;
+  lastUpdate:  Date;
 }
 
 interface Farm {
-  id: number;
-  name: string;
+  id:   number;
+  name: string;      // "Kandang 1" dst.
   data: SensorData;
 }
 
-// Simulate realistic sensor data with some variation
-const generateSensorData = (): SensorData => ({
-  temperature: 18 + Math.random() * 12, // 18-30°C
-  moisture: 40 + Math.random() * 30,    // 40-70%
-  ammonia: Math.random() * 30,          // 0-30 ppm
-  lastUpdate: new Date()
-});
-
-const fetchSensorData = async (location: string): Promise<SensorData> => {
+const fetchSensorData = async (name: string): Promise<SensorData> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/kandang/${location.replace(' ', '_')}`);
-    const json = await res.json();
-    console.log('RAW PAYLOAD FOR', location, json);
+    const locTag = name.replace(' ', '_'); // "Kandang_1"
+    const res    = await fetch(`${API_BASE_URL}/api/kandang/${locTag}`);
+    const json   = await res.json();
+    console.log('RAW PAYLOAD FOR', name, json);
 
+    // Mapping properti Influx → SensorData
+    const d = json.data;
     return {
-      temperature: json.data.temperature,
-      moisture: json.data.moisture,
-      ammonia: json.data.ammonia,
-      lastUpdate: new Date()
+      temperature: d.S_T1,    // Influx field “S_T1”
+      moisture:    d.S_H1,    // Influx field “S_H1”
+      ammonia:     d.anemo,   // Influx field “anemo”
+      lastUpdate:  new Date() // atau parse d._time jika ada
     };
   } catch (err) {
-    console.error(`Failed to fetch data for ${location}:`, err);
+    console.error(`Failed to fetch data for ${name}:`, err);
     return {
       temperature: 0,
-      moisture: 0,
-      ammonia: 0,
-      lastUpdate: new Date()
+      moisture:    0,
+      ammonia:     0,
+      lastUpdate:  new Date()
     };
   }
 };
 
-
 export const Dashboard: React.FC = () => {
-  const [farms, setFarms] = useState<Farm[]>([
-    { id: 1, name: 'Kandang 1', data: generateSensorData() },
-    { id: 2, name: 'Kandang 2', data: generateSensorData() },
-    { id: 3, name: 'Kandang 3', data: generateSensorData() }
+  const [farms, setFarms]         = useState<Farm[]>([
+    { id: 1, name: 'Kandang 1', data: { temperature: 0, moisture: 0, ammonia: 0, lastUpdate: new Date() } },
+    { id: 2, name: 'Kandang 2', data: { temperature: 0, moisture: 0, ammonia: 0, lastUpdate: new Date() } },
+    { id: 3, name: 'Kandang 3', data: { temperature: 0, moisture: 0, ammonia: 0, lastUpdate: new Date() } }
   ]);
-
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, setAutoRefresh]   = useState(true);
 
-  // Auto-refresh data every 5 seconds
+  // fungsi untuk update semua kandang
+  const updateAll = async () => {
+    const updated = await Promise.all(
+      farms.map(farm => fetchSensorData(farm.name).then(data => ({ ...farm, data })))
+    );
+    setFarms(updated);
+  };
+
+  // Auto-refresh setiap 5 detik
   useEffect(() => {
     if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      setFarms(prevFarms => {
-        Promise.all(
-          prevFarms.map(async farm => ({
-            ...farm,
-            data: await fetchSensorData(farm.name)
-          }))
-        ).then(updated => setFarms(updated));
-
-        return prevFarms;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
+    updateAll(); // initial
+    const iv = setInterval(updateAll, 5000);
+    return () => clearInterval(iv);
   }, [autoRefresh]);
 
-
-
+  // Manual refresh via tombol
   const handleRefresh = async () => {
     setIsRefreshing(true);
-
-    const updatedFarms = await Promise.all(
-      farms.map(async farm => ({
-        ...farm,
-        data: await fetchSensorData(farm.name)
-      }))
-    );
-
-    setFarms(updatedFarms);
+    await updateAll();
     setIsRefreshing(false);
   };
 
-
-  // Calculate overall system status
-  const getOverallStatus = () => {
-    const allSensors = farms.flatMap(farm => [
-      { value: farm.data.temperature, type: 'temperature' as const },
-      { value: farm.data.moisture, type: 'moisture' as const },
-      { value: farm.data.ammonia, type: 'ammonia' as const }
+  // Hitung status keseluruhan (bisa kamu sesuaikan kembali)
+  const systemStatus = (() => {
+    const all = farms.flatMap(farm => [
+      farm.data.temperature,
+      farm.data.moisture,
+      farm.data.ammonia
     ]);
-
-    const getStatusForValue = (value: number, type: 'temperature' | 'moisture' | 'ammonia') => {
-      const ranges = {
-        temperature: { min: 18, max: 25 },
-        moisture: { min: 45, max: 65 },
-        ammonia: { min: 0, max: 20 }
-      };
-      const range = ranges[type];
-      return value >= range.min && value <= range.max ? 'good' : 'warning';
+    const warnings = all.filter(v => v === 0 || isNaN(v)).length; // misal 0 dianggap warning
+    return {
+      status: warnings === 0 ? 'optimal' : 'warning',
+      warningCount: warnings,
+      totalSensors: all.length
     };
-
-    const statuses = allSensors.map(sensor => getStatusForValue(sensor.value, sensor.type));
-    const warningCount = statuses.filter(s => s === 'warning').length;
-    
-    return { 
-      status: warningCount === 0 ? 'optimal' : warningCount <= 3 ? 'warning' : 'critical',
-      warningCount,
-      totalSensors: statuses.length
-    };
-  };
-
-  const systemStatus = getOverallStatus();
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-earth">
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Activity className="h-8 w-8 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">
-                Chicken Farm Control System
-              </h1>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <Badge 
-                variant={systemStatus.status === 'optimal' ? 'default' : 'secondary'}
-                className="text-sm px-3 py-1"
-              >
-                {systemStatus.status === 'optimal' ? '✓ All Systems Optimal' : 
-                 `⚠ ${systemStatus.warningCount} Alerts`}
-              </Badge>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setAutoRefresh(!autoRefresh)}
-              >
-                {autoRefresh ? 'Auto-Refresh: ON' : 'Auto-Refresh: OFF'}
-              </Button>
-              
-              <Button 
-                variant="farm" 
-                size="sm"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Activity className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">
+              Chicken Farm Control System
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Badge
+              variant={systemStatus.status === 'optimal' ? 'default' : 'secondary'}
+              className="text-sm px-3 py-1"
+            >
+              {systemStatus.status === 'optimal'
+                ? '✓ All Systems Optimal'
+                : `⚠ ${systemStatus.warningCount} Alerts`}
+            </Badge>
+
+            <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
+              {autoRefresh ? 'Auto-Refresh: ON' : 'Auto-Refresh: OFF'}
+            </Button>
+
+            <Button variant="farm" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
         </div>
       </header>
@@ -193,7 +146,9 @@ export const Dashboard: React.FC = () => {
                 <div className="text-sm text-muted-foreground">Total Sensors</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-success">{systemStatus.totalSensors - systemStatus.warningCount}</div>
+                <div className="text-2xl font-bold text-success">
+                  {systemStatus.totalSensors - systemStatus.warningCount}
+                </div>
                 <div className="text-sm text-muted-foreground">Normal Readings</div>
               </div>
               <div className="text-center">
@@ -204,9 +159,9 @@ export const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Farm Cards Grid */}
+        {/* Grid FarmCard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {farms.map((farm) => (
+          {farms.map(farm => (
             <FarmCard
               key={farm.id}
               farmId={farm.id}
@@ -216,7 +171,7 @@ export const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* Status Indicators */}
+        {/* Optimal Ranges */}
         <Card className="mt-8 bg-card/80 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -228,20 +183,20 @@ export const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-temperature bg-opacity-10">
                 <span className="font-medium">Temperature:</span>
-                <span>18°C - 25°C</span>
+                <span>18°C – 25°C</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-moisture bg-opacity-10">
                 <span className="font-medium">Moisture:</span>
-                <span>45% - 65%</span>
+                <span>45% – 65%</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-ammonia bg-opacity-10">
                 <span className="font-medium">Ammonia:</span>
-                <span>0 - 20 ppm</span>
+                <span>0 – 20 ppm</span>
               </div>
             </div>
           </CardContent>
         </Card>
       </main>
     </div>
-  );
+);
 };
