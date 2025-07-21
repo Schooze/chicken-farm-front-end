@@ -26,11 +26,34 @@ const generateSensorData = (): SensorData => ({
   lastUpdate: new Date()
 });
 
+const fetchSensorData = async (location: string): Promise<SensorData> => {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/kandang/${location.replace(" ", "_")}`);
+    const json = await res.json();
+
+    return {
+      temperature: json.data.temperature,
+      moisture: json.data.moisture,
+      ammonia: json.data.ammonia,
+      lastUpdate: new Date()
+    };
+  } catch (err) {
+    console.error(`Failed to fetch data for ${location}:`, err);
+    return {
+      temperature: 0,
+      moisture: 0,
+      ammonia: 0,
+      lastUpdate: new Date()
+    };
+  }
+};
+
+
 export const Dashboard: React.FC = () => {
   const [farms, setFarms] = useState<Farm[]>([
-    { id: 1, name: 'Farm Alpha', data: generateSensorData() },
-    { id: 2, name: 'Farm Beta', data: generateSensorData() },
-    { id: 3, name: 'Farm Gamma', data: generateSensorData() }
+    { id: 1, name: 'Kandang 1', data: generateSensorData() },
+    { id: 2, name: 'Kandang 2', data: generateSensorData() },
+    { id: 3, name: 'Kandang 3', data: generateSensorData() }
   ]);
 
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -41,32 +64,37 @@ export const Dashboard: React.FC = () => {
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      setFarms(currentFarms => 
-        currentFarms.map(farm => ({
-          ...farm,
-          data: generateSensorData()
-        }))
-      );
+      setFarms(prevFarms => {
+        Promise.all(
+          prevFarms.map(async farm => ({
+            ...farm,
+            data: await fetchSensorData(farm.name)
+          }))
+        ).then(updated => setFarms(updated));
+
+        return prevFarms;
+      });
     }, 5000);
 
     return () => clearInterval(interval);
   }, [autoRefresh]);
 
+
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setFarms(currentFarms => 
-      currentFarms.map(farm => ({
+
+    const updatedFarms = await Promise.all(
+      farms.map(async farm => ({
         ...farm,
-        data: generateSensorData()
+        data: await fetchSensorData(farm.name)
       }))
     );
-    
+
+    setFarms(updatedFarms);
     setIsRefreshing(false);
   };
+
 
   // Calculate overall system status
   const getOverallStatus = () => {
