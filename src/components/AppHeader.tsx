@@ -24,17 +24,6 @@ export function AppHeader() {
             <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
             <span className="text-sm font-medium">All Systems Optimal</span>
           </div>
-
-          {/* Auto Refresh Status */}
-          <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Auto-Refresh: ON</span>
-          </div>
-
-          {/* Refresh Button */}
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200">
-            <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">Refresh</span>
-          </button>
         </div>
       </div>
     </header>
