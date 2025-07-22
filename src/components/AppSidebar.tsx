@@ -29,7 +29,11 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-border">
         <div className="flex items-center gap-2 px-3 py-2">
-          <Activity className="h-8 w-8 text-primary flex-shrink-0" />
+          <Activity 
+            className={`text-primary flex-shrink-0 transition-all duration-200 ${
+              state === 'collapsed' ? 'h-5 w-5' : 'h-8 w-8'
+            }`} 
+          />
           {state === 'expanded' && (
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-foreground truncate">Farm Control</h2>
