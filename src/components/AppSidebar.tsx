@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const menuItems = [
-  { title: 'Dashboard',      url: '/',        icon: Home     },
+  { title: 'Dashboard',      url: '/dashboard', icon: Home     },
   { title: 'Control Center', url: '/control', icon: Settings },
   { title: 'Analytics',      url: '/analytics', icon: BarChart3 },
 ];
