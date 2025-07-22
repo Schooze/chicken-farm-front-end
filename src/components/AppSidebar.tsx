@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Settings, Activity, BarChart3 } from 'lucide-react';
+import { Home, Settings, BarChart3 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -10,12 +10,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
   useSidebar,
 } from '@/components/ui/sidebar';
 
 const menuItems = [
-  { title: 'Dashboard',      url: '/dashboard', icon: Home     },
+  { title: 'Dashboard',      url: '/',        icon: Home     },
   { title: 'Control Center', url: '/control', icon: Settings },
   { title: 'Analytics',      url: '/analytics', icon: BarChart3 },
 ];
@@ -27,24 +26,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-border">
-        <div className="flex items-center gap-2 px-3 py-2">
-          <Activity 
-            className={`text-primary flex-shrink-0 transition-all duration-200 ${
-              state === 'collapsed' ? 'h-5 w-5' : 'h-8 w-8'
-            }`} 
-          />
-          {state === 'expanded' && (
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-foreground truncate">Farm Control</h2>
-              <p className="text-xs text-muted-foreground truncate">IoT Monitoring System</p>
-            </div>
-          )}
-        </div>
-      </SidebarHeader>
-
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="mt-4">
           <SidebarGroupLabel>
             {state === 'expanded' ? 'Navigation' : ''}
           </SidebarGroupLabel>

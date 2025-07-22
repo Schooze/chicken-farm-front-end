@@ -1,29 +1,30 @@
 import React from 'react';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from './AppSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AppHeader } from '@/components/AppHeader';
+import { AppSidebar } from '@/components/AppSidebar';
 
-interface LayoutProps {
+interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export function AppLayout({ children }: AppLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
+        {/* Sidebar */}
         <AppSidebar />
         
+        {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
-          {/* Top Header with Sidebar Toggle */}
-          <header className="h-12 flex items-center border-b border-border bg-card/80 backdrop-blur-sm px-4">
-            <SidebarTrigger className="text-foreground hover:bg-accent hover:text-accent-foreground p-2 rounded-md transition-colors" />
-          </header>
+          {/* Header */}
+          <AppHeader />
           
-          {/* Main Content */}
-          <main className="flex-1">
+          {/* Page Content */}
+          <main className="flex-1 p-4 lg:p-6 overflow-auto">
             {children}
           </main>
         </div>
       </div>
     </SidebarProvider>
   );
-};
+}
