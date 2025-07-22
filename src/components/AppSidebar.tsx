@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  useSidebar,
 } from '@/components/ui/sidebar';
 
 const menuItems = [
@@ -22,22 +23,27 @@ const menuItems = [
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { state } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-border">
         <div className="flex items-center gap-2 px-3 py-2">
-          <Activity className="h-8 w-8 text-primary" />
-          <div>
-            <h2 className="text-lg font-bold text-foreground">Farm Control</h2>
-            <p className="text-xs text-muted-foreground">IoT Monitoring System</p>
-          </div>
+          <Activity className="h-8 w-8 text-primary flex-shrink-0" />
+          {state === 'expanded' && (
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold text-foreground truncate">Farm Control</h2>
+              <p className="text-xs text-muted-foreground truncate">IoT Monitoring System</p>
+            </div>
+          )}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>
+            {state === 'expanded' ? 'Navigation' : ''}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => {
@@ -47,6 +53,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
+                      tooltip={state === 'collapsed' ? item.title : undefined}
                     >
                       <NavLink
                         to={item.url}
@@ -65,7 +72,7 @@ export function AppSidebar() {
                         )}
                         
                         <item.icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-green-600' : ''}`} />
-                        <span>{item.title}</span>
+                        {state === 'expanded' && <span>{item.title}</span>}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -75,21 +82,23 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Farm Status Indicator */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>System Status</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <div className="px-3 py-2 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-muted-foreground">All Systems Online</span>
+        {/* Farm Status Indicator - Only show when expanded */}
+        {state === 'expanded' && (
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupLabel>System Status</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <div className="px-3 py-2 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse flex-shrink-0"></div>
+                  <span className="text-muted-foreground truncate">All Systems Online</span>
+                </div>
+                <div className="text-xs text-muted-foreground truncate">
+                  Last updated: {new Date().toLocaleTimeString()}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">
-                Last updated: {new Date().toLocaleTimeString()}
-              </div>
-            </div>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
