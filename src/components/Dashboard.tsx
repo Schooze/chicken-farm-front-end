@@ -98,15 +98,6 @@ export const Dashboard: React.FC = () => {
       <header className="bg-card border-b border-border shadow-sm">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Badge
-              variant={systemStatus.status === 'optimal' ? 'default' : 'secondary'}
-              className="text-sm px-3 py-1"
-            >
-              {systemStatus.status === 'optimal'
-                ? '✓ All Systems Optimal'
-                : `⚠ ${systemStatus.warningCount} Alerts`}
-            </Badge>
-
             <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
               {autoRefresh ? 'Auto-Refresh: ON' : 'Auto-Refresh: OFF'}
             </Button>
