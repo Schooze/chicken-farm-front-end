@@ -44,21 +44,18 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      className={({ isActive }) =>
-                        `flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-200 ${
-                          isActive 
-                            ? 'bg-primary text-primary-foreground shadow-glow-success font-medium' 
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                        }`
-                      }
-                    >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                <SidebarMenuButton
+                  asChild
+                  isActive={currentPath === item.url}
+                >
+                  <NavLink
+                    to={item.url}
+                    className="flex items-center gap-2 px-3 py-2"
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    <span>{item.title}</span>
+                  </NavLink>
+                </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
