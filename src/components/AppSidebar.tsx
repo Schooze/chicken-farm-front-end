@@ -40,29 +40,37 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={currentPath === item.url}
-                  >
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        [
-                          'flex items-center gap-2 px-3 py-2 transition-all duration-200',
-                          isActive
-                            ? 'bg-sidebar-accent text-sidebar-accent-foreground border-l-4 border-sidebar-accent rounded-r-md'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md'
-                        ].join(' ')
-                      }
+              {menuItems.map((item) => {
+                const isActive = currentPath === item.url;
+                return (
+                  <SidebarMenuItem key={item.title} className="relative">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
                     >
-                      <item.icon className="h-4 w-4 flex-shrink-0" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <NavLink
+                        to={item.url}
+                        className={({ isActive }) =>
+                          [
+                            'flex items-center gap-3 px-3 py-2.5 transition-all duration-200 relative',
+                            isActive
+                              ? 'bg-green-50 text-green-700 font-medium'
+                              : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                          ].join(' ')
+                        }
+                      >
+                        {/* Active indicator - green left border */}
+                        {isActive && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500 rounded-r-sm" />
+                        )}
+                        
+                        <item.icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-green-600' : ''}`} />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -73,7 +81,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <div className="px-3 py-2 space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <div className="h-2 w-2 rounded-full bg-success animate-pulse"></div>
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
                 <span className="text-muted-foreground">All Systems Online</span>
               </div>
               <div className="text-xs text-muted-foreground">
