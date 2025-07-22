@@ -276,6 +276,73 @@ export const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Farm Statistics */}
+        <Card className="mb-8 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Total Chickens */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-orange-100">
+                    <svg className="h-5 w-5 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5C13.1 1.9 12.6 1.4 12 1.4C11.4 1.4 10.9 1.9 10.5 2.5L9 1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM11 20H7V9H11V20ZM17 20H13V9H17V20Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Total Chickens</h3>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">247</div>
+                <div className="text-sm text-green-600 font-medium mb-1">+12 this month</div>
+                <div className="text-xs text-gray-500">Active laying hens</div>
+              </div>
+
+              {/* Daily Egg Production */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-amber-100">
+                    <svg className="h-5 w-5 text-amber-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C11.5 6 7 7 7 12C7 15.31 9.69 18 13 18C16.31 18 19 15.31 19 12C19 7 14.5 6 12 2ZM12 16C10.34 16 9 14.66 9 13C9 12.45 9.45 12 10 12S11 12.45 11 13C11 13.55 11.45 14 12 14S13 13.55 13 13C13 12.45 13.45 12 14 12S15 12.45 15 13C15 14.66 13.66 16 12 16Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Daily Egg Production</h3>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">189</div>
+                <div className="text-sm text-green-600 font-medium mb-1">+5.2% from yesterday</div>
+                <div className="text-xs text-gray-500">Eggs collected today</div>
+              </div>
+
+              {/* Feed Consumption */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-green-100">
+                    <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2L13.09 5.26L16 2L14.74 5.62L18 4L15.75 7.26L20 8L16.5 9.24L19 12L15.5 10.76L16 14L12.76 11.24L12 15L11.24 11.24L8 14L8.5 10.76L5 12L7.5 9.24L2 8L6.25 7.26L4 4L7.26 5.62L6 2L8.91 5.26L12 2Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Feed Consumption</h3>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">145 kg</div>
+                <div className="text-sm text-blue-600 font-medium mb-1">Normal levels</div>
+                <div className="text-xs text-gray-500">Daily feed usage</div>
+              </div>
+
+              {/* Health Score */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-red-100">
+                    <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800">Health Score</h3>
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">94%</div>
+                <div className="text-sm text-green-600 font-medium mb-1">+2% this week</div>
+                <div className="text-xs text-gray-500">Flock health average</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Grid FarmCard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {farms.map(farm => (
