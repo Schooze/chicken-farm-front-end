@@ -14,16 +14,14 @@ import {
 } from '@/components/ui/sidebar';
 
 const menuItems = [
-  { title: 'Dashboard', url: '/', icon: Home },
+  { title: 'Dashboard',      url: '/',        icon: Home     },
   { title: 'Control Center', url: '/control', icon: Settings },
-  { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+  { title: 'Analytics',      url: '/analytics', icon: BarChart3 },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
-
-  const isActive = (path: string) => currentPath === path;
 
   return (
     <Sidebar collapsible="icon">
@@ -44,22 +42,25 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={currentPath === item.url}
-                >
-                <NavLink
-                  to={item.url}
-                  className={({ isActive }) =>
-                    [
-                      'flex items-center gap-2 px-3 py-2 transition-all duration-200',
-                      isActive
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground border-l-4 border-sidebar-accent rounded-r-md'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md'
-                    ].join(' ')
-                  }
-                >
-                </SidebarMenuButton>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={currentPath === item.url}
+                  >
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        [
+                          'flex items-center gap-2 px-3 py-2 transition-all duration-200',
+                          isActive
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground border-l-4 border-sidebar-accent rounded-r-md'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md'
+                        ].join(' ')
+                      }
+                    >
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
