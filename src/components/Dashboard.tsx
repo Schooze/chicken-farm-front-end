@@ -29,9 +29,9 @@ const fetchSensorData = async (name: string): Promise<SensorData> => {
     // Mapping properti Influx → SensorData
     const d = json.data;
     return {
-      temperature: d.S_T1,    // Influx field “S_T1”
-      moisture:    d.S_H1,    // Influx field “S_H1”
-      ammonia:     d.anemo,   // Influx field “anemo”
+      temperature: d.S_T1,    // Influx field "S_T1"
+      moisture:    d.S_H1,    // Influx field "S_H1"
+      ammonia:     d.anemo,   // Influx field "anemo"
       lastUpdate:  new Date() // atau parse d._time jika ada
     };
   } catch (err) {
@@ -96,16 +96,20 @@ export const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-earth">
       {/* Header */}
       <header className="bg-card border-b border-border shadow-sm">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
-              {autoRefresh ? 'Auto-Refresh: ON' : 'Auto-Refresh: OFF'}
-            </Button>
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-semibold">Chicken Farm Control System</h1>
+            
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={() => setAutoRefresh(!autoRefresh)}>
+                {autoRefresh ? 'Auto-Refresh: ON' : 'Auto-Refresh: OFF'}
+              </Button>
 
-            <Button variant="farm" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+              <Button variant="farm" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -183,5 +187,5 @@ export const Dashboard: React.FC = () => {
         </Card>
       </main>
     </div>
-);
+  );
 };
