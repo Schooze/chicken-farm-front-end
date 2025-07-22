@@ -48,13 +48,17 @@ export function AppSidebar() {
                   asChild
                   isActive={currentPath === item.url}
                 >
-                  <NavLink
-                    to={item.url}
-                    className="flex items-center gap-2 px-3 py-2"
-                  >
-                    <item.icon className="h-4 w-4 flex-shrink-0" />
-                    <span>{item.title}</span>
-                  </NavLink>
+                <NavLink
+                  to={item.url}
+                  className={({ isActive }) =>
+                    [
+                      'flex items-center gap-2 px-3 py-2 transition-all duration-200',
+                      isActive
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground border-l-4 border-sidebar-accent rounded-r-md'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md'
+                    ].join(' ')
+                  }
+                >
                 </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
