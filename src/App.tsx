@@ -17,7 +17,6 @@ import AnalyticsPage from '@/pages/AnalyticsPage';
 import NotFound from '@/pages/NotFound';
 import { AlertProvider } from './contexts/AlertContext';
 
-
 const queryClient = new QueryClient();
 
 const App: React.FC = () => (
@@ -26,45 +25,37 @@ const App: React.FC = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            {/* Redirect root ("/") → "/dashboard" */}
-            <Route
-              path="/"
-              element={<Navigate to="/dashboard" replace />}
-            />
-            {/* Dashboard */}
-            <Route
-              path="/dashboard"
-              element={<Index />}
-            />
-            {/* Control Center */}
-            <Route
-              path="/control"
-              element={<ControlPage />}
-            />
-            {/* Analytics */}
-            <Route
-              path="/analytics"
-              element={<AnalyticsPage />}
-            />
-            {/* Catch-all untuk 404 */}
-            <Route
-              path="*"
-              element={<NotFound />}
-            />
-          </Routes>
-        </Layout>
-      <AlertProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/control" element={<ControlPage />} />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </AlertProvider>
+        <AlertProvider>
+          <Layout>
+            <Routes>
+              {/* Redirect root ("/") → "/dashboard" */}
+              <Route
+                path="/"
+                element={<Navigate to="/dashboard" replace />}
+              />
+              {/* Dashboard */}
+              <Route
+                path="/dashboard"
+                element={<Index />}
+              />
+              {/* Control Center */}
+              <Route
+                path="/control"
+                element={<ControlPage />}
+              />
+              {/* Analytics */}
+              <Route
+                path="/analytics"
+                element={<AnalyticsPage />}
+              />
+              {/* Catch-all untuk 404 */}
+              <Route
+                path="*"
+                element={<NotFound />}
+              />
+            </Routes>
+          </Layout>
+        </AlertProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

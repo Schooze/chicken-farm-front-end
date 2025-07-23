@@ -1,3 +1,5 @@
+//This is AppHeader.tsx
+
 import React, { useState } from 'react';
 import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, PanelLeftOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -138,7 +140,7 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, dest
 export function AppHeader() {
   const { alerts } = useAlerts(); // Add this line
   const { toggleSidebar } = useSidebar();
-
+  const [showAlerts, setShowAlerts] = useState(false);
 
   // Calculate alert counts
   // const warningCount = mockFarmAlerts.warnings.length;
