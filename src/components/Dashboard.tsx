@@ -327,7 +327,7 @@ export const Dashboard: React.FC = () => {
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-800">Chicken Farm Control System</h1>
+            <h1 className="text-xl font-semibold text-gray-800">Dashboard</h1>
             
             <div className="flex items-center gap-4">
               <Button 
