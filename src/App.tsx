@@ -1,4 +1,5 @@
 // src/App.tsx
+// Biar bisa commit aja, ini udah bagus banget. Alert berfungsi dengan baik
 import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
