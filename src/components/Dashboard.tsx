@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, Settings, AlertTriangle, Thermometer, Droplets, Wind } from 'lucide-react';
+import { AppHeader } from './AppHeader';
 
 export interface SensorData {
   temperature: number;
@@ -15,6 +16,97 @@ interface Farm {
   name: string;
   data: SensorData;
 }
+
+
+//Function to generate Alert Status
+const generateAlerts = (farms: Farm[]) => {
+  const warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}> = [];
+  const destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}> = [];
+
+  farms.forEach(farm => {
+    const { data } = farm;
+    
+    // Check temperature
+    const tempStatus = getStatus(data.temperature, 'temperature');
+    if (tempStatus === 'warning') {
+      warnings.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Temperature',
+        value: `${data.temperature.toFixed(1)}°C`,
+        threshold: '18-25°C'
+      });
+    } else if (tempStatus === 'destructive') {
+      destructive.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Temperature',
+        value: `${data.temperature.toFixed(1)}°C`,
+        threshold: '18-25°C'
+      });
+    }
+
+    // Check moisture
+    const moistureStatus = getStatus(data.moisture, 'moisture');
+    if (moistureStatus === 'warning') {
+      warnings.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Moisture',
+        value: `${data.moisture.toFixed(1)}%`,
+        threshold: '45-65%'
+      });
+    } else if (moistureStatus === 'destructive') {
+      destructive.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Moisture',
+        value: `${data.moisture.toFixed(1)}%`,
+        threshold: '45-65%'
+      });
+    }
+
+    // Check ammonia
+    const ammoniaStatus = getStatus(data.ammonia, 'ammonia');
+    if (ammoniaStatus === 'warning') {
+      warnings.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Ammonia',
+        value: `${data.ammonia.toFixed(1)} ppm`,
+        threshold: '0-20 ppm'
+      });
+    } else if (ammoniaStatus === 'destructive') {
+      destructive.push({
+        farmId: farm.id,
+        farmName: farm.name,
+        sensor: 'Ammonia',
+        value: `${data.ammonia.toFixed(1)} ppm`,
+        threshold: '0-20 ppm'
+      });
+    }
+  });
+
+  return { warnings, destructive };
+};
+
+//Function to get status based on value and type
+const getStatus = (value: number, type: string) => {
+  if (type === 'temperature') {
+    if (value >= 18 && value <= 25) return 'success';
+    if (value > 30) return 'destructive';
+    return 'warning';
+  }
+  if (type === 'moisture') {
+    if (value >= 45 && value <= 65) return 'success';
+    if (value > 80) return 'destructive';
+    return 'warning';
+  }
+  if (type === 'ammonia') {
+    if (value <= 20) return 'success';
+    return 'destructive';
+  }
+};
 
 // Mock FarmCard component for demo
 const FarmCard = ({ farmId, farmName, data }) => {
@@ -32,23 +124,6 @@ const FarmCard = ({ farmId, farmName, data }) => {
     if (type === 'ammonia') {
       if (value <= 20) return 'bg-green-500';
       return 'bg-red-500';
-    }
-  };
-
-  const getStatus = (value, type) => {
-    if (type === 'temperature') {
-      if (value >= 18 && value <= 25) return 'success';
-      if (value > 30) return 'destructive';
-      return 'warning';
-    }
-    if (type === 'moisture') {
-      if (value >= 45 && value <= 65) return 'success';
-      if (value > 80) return 'destructive';
-      return 'warning';
-    }
-    if (type === 'ammonia') {
-      if (value <= 20) return 'success';
-      return 'destructive';
     }
   };
 
@@ -148,26 +223,49 @@ const FarmCard = ({ farmId, farmName, data }) => {
   );
 };
 
-const fetchSensorData = async (name: string): Promise<SensorData> => {
-  // Mock data for demo
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        temperature: Math.random() * 15 + 20, // 20-35°C
-        moisture: Math.random() * 40 + 40,    // 40-80%
-        ammonia: Math.random() * 25,          // 0-25 ppm
-        lastUpdate: new Date()
-      });
-    }, 500);
-  });
+// const fetchSensorData = async (name: string): Promise<SensorData> => {
+//   // Mock data for demo
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       resolve({
+//         temperature: Math.random() * 15 + 20, // 20-35°C
+//         moisture: Math.random() * 40 + 40,    // 40-80%
+//         ammonia: Math.random() * 25,          // 0-25 ppm
+//         lastUpdate: new Date()
+//       });
+//     }, 500);
+//   });
+// };
+
+const fetchSensorData = async (location: string): Promise<SensorData> => {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/api/kandang/${location.replace(" ", "_")}`);
+    const json = await res.json();
+
+    return {
+      temperature: json.data.temperature,
+      moisture: json.data.moisture,
+      ammonia: json.data.ammonia,
+      lastUpdate: new Date()
+    };
+  } catch (err) {
+    console.error(`Failed to fetch data for ${location}:`, err);
+    return {
+      temperature: 0,
+      moisture: 0,
+      ammonia: 0,
+      lastUpdate: new Date()
+    };
+  }
 };
 
 export const Dashboard: React.FC = () => {
   const [farms, setFarms] = useState<Farm[]>([
-    { id: 1, name: 'Kandang 1', data: { temperature: 28.0, moisture: 83.0, ammonia: 4.8, lastUpdate: new Date() } },
-    { id: 2, name: 'Kandang 2', data: { temperature: 28.3, moisture: 65.7, ammonia: 15.3, lastUpdate: new Date() } },
-    { id: 3, name: 'Kandang 3', data: { temperature: 33.4, moisture: 66.2, ammonia: 1.5, lastUpdate: new Date() } }
+    { id: 1, name: 'Kandang 1', data: generateSensorData() },
+    { id: 2, name: 'Kandang 2', data: generateSensorData() },
+    { id: 3, name: 'Kandang 3', data: generateSensorData() }
   ]);
+  const [alerts, setAlerts] = useState({ warnings: [], destructive: [] });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
@@ -183,9 +281,11 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     if (!autoRefresh) return;
     updateAll(); // initial
+    const newAlerts = generateAlerts(farms);
+    setAlerts(newAlerts);
     const iv = setInterval(updateAll, 5000);
     return () => clearInterval(iv);
-  }, [autoRefresh]);
+  }, [autoRefresh, farms]);
 
   // Manual refresh via tombol
   const handleRefresh = async () => {
@@ -211,6 +311,9 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50">
+      
+      {/* Pass alerts as props to AppHeader */}
+      <AppHeader alerts={alerts} />
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">

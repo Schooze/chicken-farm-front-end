@@ -5,23 +5,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
 
 // Mock data untuk demo - dalam implementasi nyata, ini akan datang dari props atau context
-const mockFarmAlerts = {
-  warnings: [
-    { farmId: 1, farmName: 'Kandang 1', sensor: 'Moisture', value: '66.2%', threshold: '45-65%' },
-    { farmId: 3, farmName: 'Kandang 3', sensor: 'Temperature', value: '26.8°C', threshold: '18-25°C' }
-  ],
-  destructive: [
-    { farmId: 1, farmName: 'Kandang 1', sensor: 'Temperature', value: '33.4°C', threshold: '18-25°C' },
-    { farmId: 2, farmName: 'Kandang 2', sensor: 'Ammonia', value: '25.3 ppm', threshold: '0-20 ppm' }
-  ]
-};
+// const mockFarmAlerts = {
+//   warnings: [
+//     { farmId: 1, farmName: 'Kandang 1', sensor: 'Moisture', value: '66.2%', threshold: '45-65%' },
+//     { farmId: 3, farmName: 'Kandang 3', sensor: 'Temperature', value: '26.8°C', threshold: '18-25°C' }
+//   ],
+//   destructive: [
+//     { farmId: 1, farmName: 'Kandang 1', sensor: 'Temperature', value: '33.4°C', threshold: '18-25°C' },
+//     { farmId: 2, farmName: 'Kandang 2', sensor: 'Ammonia', value: '25.3 ppm', threshold: '0-20 ppm' }
+//   ]
+// };
 
-interface AlertPopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-  warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
-  destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+interface AppHeaderProps {
+  alerts: {
+    warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+    destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+  };
 }
+
+// interface AlertPopupProps {
+//   isOpen: boolean;
+//   onClose: () => void;
+//   warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+//   destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+// }
 
 const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, destructive }) => {
   if (!isOpen) return null;
@@ -133,13 +140,16 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, dest
   );
 };
 
-export function AppHeader() {
+export function AppHeader({ alerts }: AppHeaderProps) {
   const [showAlerts, setShowAlerts] = useState(false);
   const { toggleSidebar } = useSidebar();
-  
+
+
   // Calculate alert counts
-  const warningCount = mockFarmAlerts.warnings.length;
-  const destructiveCount = mockFarmAlerts.destructive.length;
+  // const warningCount = mockFarmAlerts.warnings.length;
+  const warningCount = alerts.warnings.length;
+  // const destructiveCount = mockFarmAlerts.destructive.length;
+  const destructiveCount = alerts.destructive.length;
   const totalAlerts = warningCount + destructiveCount;
   
   // Determine status
@@ -239,8 +249,8 @@ export function AppHeader() {
       <AlertPopup
         isOpen={showAlerts}
         onClose={() => setShowAlerts(false)}
-        warnings={mockFarmAlerts.warnings}
-        destructive={mockFarmAlerts.destructive}
+        warnings={alerts.warnings}
+        destructive={alerts.destructive}
       />
     </>
   );
