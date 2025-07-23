@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, Menu } from 'lucide-react';
+import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, PanelLeftOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
@@ -190,10 +190,10 @@ export function AppHeader() {
               variant="ghost" 
               size="sm" 
               onClick={toggleSidebar}
-              className="h-8 w-8 p-0 hover:bg-gray-100 transition-colors"
+              className="h-8 w-8 p-0 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               title="Toggle Sidebar"
             >
-              <Menu className="h-4 w-4" />
+              <PanelLeftOpen className="h-4 w-4" />
             </Button>
             
             {/* Logo and Title */}
