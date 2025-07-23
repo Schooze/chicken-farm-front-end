@@ -391,7 +391,7 @@ export const Dashboard: React.FC = () => {
         {/* Farm Statistics */}
         <Card className="mb-8 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Total Chickens */}
               <div className="flex flex-col items-center text-center">
                 <div className="flex items-center gap-3 mb-2">
@@ -437,20 +437,7 @@ export const Dashboard: React.FC = () => {
                 <div className="text-xs text-gray-500">Flock health average</div>
               </div>
 
-              {/* Production Rate - Added 4th item for balance */}
-              <div className="flex flex-col items-center text-center">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-yellow-100">
-                    <svg className="h-5 w-5 text-yellow-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5C13.1 1.9 12.6 1.4 12 1.4C11.4 1.4 10.9 1.9 10.5 2.5L9 1L3 7V9H5V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V9H21ZM11 20H7V9H11V20ZM17 20H13V9H17V20Z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Production Rate</h3>
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">87%</div>
-                <div className="text-sm text-green-600 font-medium mb-1">+5% this week</div>
-                <div className="text-xs text-gray-500">Daily egg production</div>
-              </div>
+
             </div>
           </CardContent>
         </Card>
