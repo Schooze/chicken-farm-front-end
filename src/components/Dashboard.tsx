@@ -10,7 +10,7 @@ import { useAlerts } from '@/contexts/AlertContext';
 
 export interface SensorData {
   temperature: number;
-  moisture: number;
+  humidity: number;
   ammonia: number;
   lastUpdate: Date;
 }
@@ -50,22 +50,22 @@ const generateAlerts = (farms: Farm[]) => {
       });
     }
 
-    // Check moisture
-    const moistureStatus = getStatus(data.moisture, 'moisture');
-    if (moistureStatus === 'warning') {
+    // Check humidity
+    const humidityStatus = getStatus(data.humidity, 'humidity');
+    if (humidityStatus === 'warning') {
       warnings.push({
         farmId: farm.id,
         farmName: farm.name,
-        sensor: 'Moisture',
-        value: `${data.moisture.toFixed(1)}%`,
+        sensor: 'humidity',
+        value: `${data.humidity.toFixed(1)}%`,
         threshold: '45-65%'
       });
-    } else if (moistureStatus === 'destructive') {
+    } else if (humidityStatus === 'destructive') {
       destructive.push({
         farmId: farm.id,
         farmName: farm.name,
-        sensor: 'Moisture',
-        value: `${data.moisture.toFixed(1)}%`,
+        sensor: 'humidity',
+        value: `${data.humidity.toFixed(1)}%`,
         threshold: '45-65%'
       });
     }
@@ -101,7 +101,7 @@ const getStatus = (value: number, type: string) => {
     if (value > 30) return 'destructive';
     return 'warning';
   }
-  if (type === 'moisture') {
+  if (type === 'humidity') {
     if (value >= 45 && value <= 65) return 'success';
     if (value > 80) return 'destructive';
     return 'warning';
@@ -120,7 +120,7 @@ const FarmCard = ({ farmId, farmName, data }) => {
       if (value > 30) return 'bg-red-500';
       return 'bg-yellow-500';
     }
-    if (type === 'moisture') {
+    if (type === 'humidity') {
       if (value >= 45 && value <= 65) return 'bg-green-500';
       if (value > 80) return 'bg-red-500';
       return 'bg-yellow-500';
@@ -148,18 +148,18 @@ const FarmCard = ({ farmId, farmName, data }) => {
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
               getStatus(data.temperature, 'temperature') === 'success' && 
-              getStatus(data.moisture, 'moisture') === 'success' && 
+              getStatus(data.humidity, 'humidity') === 'success' && 
               getStatus(data.ammonia, 'ammonia') === 'success' 
                 ? 'bg-green-500' : 'bg-red-500'
             }`}></div>
             <span className={`text-xs px-2 py-1 rounded-full ${
               getStatus(data.temperature, 'temperature') === 'success' && 
-              getStatus(data.moisture, 'moisture') === 'success' && 
+              getStatus(data.humidity, 'humidity') === 'success' && 
               getStatus(data.ammonia, 'ammonia') === 'success' 
                 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
               {getStatus(data.temperature, 'temperature') === 'success' && 
-               getStatus(data.moisture, 'moisture') === 'success' && 
+               getStatus(data.humidity, 'humidity') === 'success' && 
                getStatus(data.ammonia, 'ammonia') === 'success' ? 'Normal' : 'Critical'}
             </span>
           </div>
@@ -184,20 +184,20 @@ const FarmCard = ({ farmId, farmName, data }) => {
           </div>
         </div>
 
-        {/* Moisture */}
+        {/* humidity */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-200">
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">Moisture</span>
+            <span className="text-sm font-medium text-gray-700">humidity</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-800">{data.moisture.toFixed(1)}%</span>
+            <span className="text-lg font-bold text-gray-800">{data.humidity.toFixed(1)}%</span>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              getStatus(data.moisture, 'moisture') === 'success' ? 'bg-green-100 text-green-800' :
-              getStatus(data.moisture, 'moisture') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+              getStatus(data.humidity, 'humidity') === 'success' ? 'bg-green-100 text-green-800' :
+              getStatus(data.humidity, 'humidity') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
               'bg-red-100 text-red-800'
             }`}>
-              {getStatus(data.moisture, 'moisture')}
+              {getStatus(data.humidity, 'humidity')}
             </span>
           </div>
         </div>
@@ -233,7 +233,7 @@ const FarmCard = ({ farmId, farmName, data }) => {
 //     setTimeout(() => {
 //       resolve({
 //         temperature: Math.random() * 15 + 20, // 20-35°C
-//         moisture: Math.random() * 40 + 40,    // 40-80%
+//         humidity: Math.random() * 40 + 40,    // 40-80%
 //         ammonia: Math.random() * 25,          // 0-25 ppm
 //         lastUpdate: new Date()
 //       });
@@ -243,9 +243,9 @@ const FarmCard = ({ farmId, farmName, data }) => {
 
 // Simulate realistic sensor data with some variation
 const generateSensorData = (): SensorData => ({
-  temperature: 18 + Math.random() * 12, // 18-30°C
-  moisture: 40 + Math.random() * 30,    // 40-70%
-  ammonia: Math.random() * 30,          // 0-30 ppm
+  temperature: 0,
+  humidity: 0,
+  ammonia: 0,
   lastUpdate: new Date()
 });
 
@@ -256,7 +256,7 @@ const fetchSensorData = async (location: string): Promise<SensorData> => {
 
     return {
       temperature: json.data.temperature,
-      moisture: json.data.moisture,
+      humidity: json.data.humidity,
       ammonia: json.data.ammonia,
       lastUpdate: new Date()
     };
@@ -264,7 +264,7 @@ const fetchSensorData = async (location: string): Promise<SensorData> => {
     console.error(`Failed to fetch data for ${location}:`, err);
     return {
       temperature: 0,
-      moisture: 0,
+      humidity: 0,
       ammonia: 0,
       lastUpdate: new Date()
     };
@@ -310,7 +310,7 @@ export const Dashboard: React.FC = () => {
   const systemStatus = (() => {
     const all = farms.flatMap(farm => [
       farm.data.temperature,
-      farm.data.moisture,
+      farm.data.humidity,
       farm.data.ammonia
     ]);
     const warnings = all.filter(v => v === 0 || isNaN(v)).length;
@@ -487,7 +487,7 @@ export const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-200 border border-gray-200">
                 <div className="flex items-center gap-2">
                   <Droplets className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-gray-700">Moisture:</span>
+                  <span className="font-medium text-gray-700">humidity:</span>
                 </div>
                 <span className="font-semibold text-gray-800">45% – 65%</span>
               </div>
