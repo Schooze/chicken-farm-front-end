@@ -3,6 +3,8 @@ import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, PanelL
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
+import { useAlerts } from '@/contexts/AlertContext'; // Add this import at the top
+
 
 // Mock data untuk demo - dalam implementasi nyata, ini akan datang dari props atau context
 // const mockFarmAlerts = {
@@ -15,13 +17,6 @@ import { useSidebar } from '@/components/ui/sidebar';
 //     { farmId: 2, farmName: 'Kandang 2', sensor: 'Ammonia', value: '25.3 ppm', threshold: '0-20 ppm' }
 //   ]
 // };
-
-interface AppHeaderProps {
-  alerts: {
-    warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
-    destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
-  };
-}
 
 // interface AlertPopupProps {
 //   isOpen: boolean;
@@ -140,16 +135,16 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, dest
   );
 };
 
-export function AppHeader({ alerts }: AppHeaderProps) {
-  const [showAlerts, setShowAlerts] = useState(false);
+export function AppHeader() {
+  const { alerts } = useAlerts(); // Add this line
   const { toggleSidebar } = useSidebar();
 
 
   // Calculate alert counts
   // const warningCount = mockFarmAlerts.warnings.length;
-  const warningCount = alerts.warnings.length;
   // const destructiveCount = mockFarmAlerts.destructive.length;
-  const destructiveCount = alerts.destructive.length;
+  const warningCount = alerts?.warnings?.length || 0;
+  const destructiveCount = alerts?.destructive?.length || 0;
   const totalAlerts = warningCount + destructiveCount;
   
   // Determine status
@@ -249,8 +244,8 @@ export function AppHeader({ alerts }: AppHeaderProps) {
       <AlertPopup
         isOpen={showAlerts}
         onClose={() => setShowAlerts(false)}
-        warnings={alerts.warnings}
-        destructive={alerts.destructive}
+        warnings={alerts?.warnings || []}
+        destructive={alerts?.destructive || []}
       />
     </>
   );

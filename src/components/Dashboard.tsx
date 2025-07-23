@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, Settings, AlertTriangle, Thermometer, Droplets, Wind } from 'lucide-react';
 import { AppHeader } from './AppHeader';
+import { useAlerts } from '@/contexts/AlertContext';
+
 
 export interface SensorData {
   temperature: number;
@@ -273,7 +275,7 @@ export const Dashboard: React.FC = () => {
     { id: 2, name: 'Kandang 2', data: generateSensorData() },
     { id: 3, name: 'Kandang 3', data: generateSensorData() }
   ]);
-  const [alerts, setAlerts] = useState({ warnings: [], destructive: [] });
+  const { setAlerts } = useAlerts();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
@@ -319,9 +321,6 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50">
-
-      {/* Pass alerts as props to AppHeader */}
-      <AppHeader alerts={alerts} />
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">

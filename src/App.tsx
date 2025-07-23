@@ -15,6 +15,8 @@ import Index from '@/pages/Index';           // ini akan jadi DashboardPage
 import ControlPage from '@/pages/ControlPage';
 import AnalyticsPage from '@/pages/AnalyticsPage';
 import NotFound from '@/pages/NotFound';
+import { AlertProvider } from './contexts/AlertContext';
+
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,7 @@ const App: React.FC = () => (
             />
           </Routes>
         </Layout>
+      </AlertProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
