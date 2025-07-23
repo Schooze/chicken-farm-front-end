@@ -184,11 +184,11 @@ const FarmCard = ({ farmId, farmName, data }) => {
           </div>
         </div>
 
-        {/* humidity */}
+        {/* Humidity */}
         <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-200">
           <div className="flex items-center gap-2">
             <Droplets className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-gray-700">humidity</span>
+            <span className="text-sm font-medium text-gray-700">Humidity</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-gray-800">{data.humidity.toFixed(1)}%</span>
@@ -487,7 +487,7 @@ export const Dashboard: React.FC = () => {
               <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-100 to-blue-200 border border-gray-200">
                 <div className="flex items-center gap-2">
                   <Droplets className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-gray-700">humidity:</span>
+                  <span className="font-medium text-gray-700">Humidity:</span>
                 </div>
                 <span className="font-semibold text-gray-800">45% – 65%</span>
               </div>
