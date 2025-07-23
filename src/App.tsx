@@ -55,6 +55,15 @@ const App: React.FC = () => (
             />
           </Routes>
         </Layout>
+      <AlertProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/control" element={<ControlPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
       </AlertProvider>
       </BrowserRouter>
     </TooltipProvider>
