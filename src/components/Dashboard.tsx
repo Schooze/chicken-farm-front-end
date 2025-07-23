@@ -237,6 +237,14 @@ const FarmCard = ({ farmId, farmName, data }) => {
 //   });
 // };
 
+// Simulate realistic sensor data with some variation
+const generateSensorData = (): SensorData => ({
+  temperature: 18 + Math.random() * 12, // 18-30°C
+  moisture: 40 + Math.random() * 30,    // 40-70%
+  ammonia: Math.random() * 30,          // 0-30 ppm
+  lastUpdate: new Date()
+});
+
 const fetchSensorData = async (location: string): Promise<SensorData> => {
   try {
     const res = await fetch(`http://127.0.0.1:8000/api/kandang/${location.replace(" ", "_")}`);
@@ -311,7 +319,7 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-yellow-50">
-      
+
       {/* Pass alerts as props to AppHeader */}
       <AppHeader alerts={alerts} />
       {/* Header */}
