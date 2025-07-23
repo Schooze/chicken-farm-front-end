@@ -407,21 +407,6 @@ export const Dashboard: React.FC = () => {
                 <div className="text-xs text-gray-500">Active laying hens</div>
               </div>
 
-              {/* Daily Egg Production */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-amber-100">
-                    <svg className="h-5 w-5 text-amber-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C11.5 6 7 7 7 12C7 15.31 9.69 18 13 18C16.31 18 19 15.31 19 12C19 7 14.5 6 12 2ZM12 16C10.34 16 9 14.66 9 13C9 12.45 9.45 12 10 12S11 12.45 11 13C11 13.55 11.45 14 12 14S13 13.55 13 13C13 12.45 13.45 12 14 12S15 12.45 15 13C15 14.66 13.66 16 12 16Z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Daily Egg Production</h3>
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">189</div>
-                <div className="text-sm text-green-600 font-medium mb-1">+5.2% from yesterday</div>
-                <div className="text-xs text-gray-500">Eggs collected today</div>
-              </div>
-
               {/* Feed Consumption */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-3 mb-2">
