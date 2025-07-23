@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle } from 'lucide-react';
+import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSidebar } from '@/components/ui/sidebar';
 
 // Mock data untuk demo - dalam implementasi nyata, ini akan datang dari props atau context
 const mockFarmAlerts = {
@@ -134,6 +135,7 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, dest
 
 export function AppHeader() {
   const [showAlerts, setShowAlerts] = useState(false);
+  const { toggleSidebar } = useSidebar();
   
   // Calculate alert counts
   const warningCount = mockFarmAlerts.warnings.length;
@@ -181,11 +183,20 @@ export function AppHeader() {
     <>
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="flex h-14 items-center justify-between px-4 lg:px-6">
-          {/* Left Section: Trigger + Title */}
+          {/* Left Section: Sidebar Toggle + Logo + Title */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="lg:hidden">
-              <Activity className="h-4 w-4" />
+            {/* Sidebar Toggle Button */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={toggleSidebar}
+              className="h-8 w-8 p-0 hover:bg-gray-100 transition-colors"
+              title="Toggle Sidebar"
+            >
+              <Menu className="h-4 w-4" />
             </Button>
+            
+            {/* Logo and Title */}
             <div className="flex items-center gap-2">
               <Activity className="h-6 w-6 text-green-600" />
               <h1 className="text-lg font-semibold text-foreground">
