@@ -83,11 +83,15 @@ export const ControlPage: React.FC = () => {
 
   const handleFrequencyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setTempFrequency(value);
-    
     const numValue = parseFloat(value);
+    
     if (!isNaN(numValue)) {
+      // Clamp the display value as well
+      const clampedValue = Math.max(0, Math.min(50, numValue));
+      setTempFrequency(clampedValue.toString());
       handleFrequencyChange(numValue);
+    } else {
+      setTempFrequency(value);
     }
   };
 
