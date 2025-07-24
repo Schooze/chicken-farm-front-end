@@ -235,7 +235,7 @@ export const ControlPage: React.FC = () => {
               </div>
               
               {/* On/Off Toggle */}
-              <Button 
+              {/* <Button 
                 variant={selectedFarm.controls.fan ? 'destructive' : 'default'}
                 size="lg"
                 onClick={() => handleControlToggle('fan')}
@@ -247,7 +247,7 @@ export const ControlPage: React.FC = () => {
               >
                 <Power className="h-4 w-4 mr-2" />
                 Turn {selectedFarm.controls.fan ? 'OFF' : 'ON'} Fan
-              </Button>
+              </Button> */}
 
               {/* Frequency Control */}
               <div className="space-y-4 p-4 rounded-lg bg-gray-50">
