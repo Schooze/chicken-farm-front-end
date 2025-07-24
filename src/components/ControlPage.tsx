@@ -145,7 +145,7 @@ export const ControlPage: React.FC = () => {
       {selectedFarm && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Fan Control */}
-          <Card className="hover:shadow-xl transition-all duration-300 bg-white">
+          <Card className="hover:shadow-elevated transition-all duration-300 bg-card/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
@@ -160,7 +160,7 @@ export const ControlPage: React.FC = () => {
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.fan) as any}
-                  className="text-sm px-3 py-1"
+                  className={`text-sm px-3 py-1 ${selectedFarm.controls.fan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                 >
                   {getStatusText(selectedFarm.controls.fan)}
                 </Badge>
@@ -238,7 +238,7 @@ export const ControlPage: React.FC = () => {
               </div>
 
               {selectedFarm.controls.lastFanToggle && (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   Last updated: {selectedFarm.controls.lastFanToggle.toLocaleTimeString()}
                 </div>
@@ -247,7 +247,7 @@ export const ControlPage: React.FC = () => {
           </Card>
 
           {/* Feeder Control */}
-          <Card className="hover:shadow-elevated transition-all duration-300 bg-card/80 backdrop-blur-sm">
+          <Card className="hover:shadow-xl transition-all duration-300 bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Utensils className={`h-6 w-6 ${selectedFarm.controls.feeder ? 'text-warning' : 'text-muted-foreground'}`} />
@@ -262,7 +262,7 @@ export const ControlPage: React.FC = () => {
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.feeder) as any}
-                  className="text-sm px-3 py-1"
+                  className={`text-sm px-3 py-1 ${selectedFarm.controls.feeder ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                 >
                   {getStatusText(selectedFarm.controls.feeder)}
                 </Badge>
@@ -279,7 +279,7 @@ export const ControlPage: React.FC = () => {
               </Button>
 
               {selectedFarm.controls.lastFeederToggle && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Clock className="h-3 w-3" />
                   Last toggled: {selectedFarm.controls.lastFeederToggle.toLocaleTimeString()}
                 </div>
@@ -320,7 +320,7 @@ export const ControlPage: React.FC = () => {
                     </div>
                     <Badge 
                       variant={getStatusColor(farm.controls.fan) as any}
-                      className="text-xs"
+                      className={`text-xs ${farm.controls.fan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                     >
                       {getStatusText(farm.controls.fan)}
                     </Badge>
@@ -332,7 +332,7 @@ export const ControlPage: React.FC = () => {
                     </div>
                     <Badge 
                       variant={getStatusColor(farm.controls.feeder) as any}
-                      className="text-xs"
+                      className={`text-xs ${farm.controls.feeder ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                     >
                       {getStatusText(farm.controls.feeder)}
                     </Badge>
