@@ -171,7 +171,11 @@ export const ControlPage: React.FC = () => {
                 variant={selectedFarm.controls.fan ? 'destructive' : 'default'}
                 size="lg"
                 onClick={() => handleControlToggle('fan')}
-                className="w-full transition-all duration-300 bg-green-600 hover:bg-green-700 text-white"
+                className={`w-full transition-all duration-300 text-white ${
+                  selectedFarm.controls.fan 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
               >
                 <Power className="h-4 w-4 mr-2" />
                 Turn {selectedFarm.controls.fan ? 'OFF' : 'ON'} Fan
@@ -188,39 +192,44 @@ export const ControlPage: React.FC = () => {
                   </span>
                 </div>
                 
-                {/* Slider */}
-                <div className="space-y-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="60"
-                    value={selectedFarm.controls.fanFrequency}
-                    onChange={handleSliderChange}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                    style={{
-                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb 100%)`
-                    }}
-                  />
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>0Hz</span>
-                    <span>30Hz</span>
-                    <span>60Hz</span>
+                {/* Slider and Manual Input Side by Side */}
+                <div className="flex items-center gap-4">
+                  {/* Slider - 8/10 width */}
+                  <div className="flex-[8] space-y-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="60"
+                      value={selectedFarm.controls.fanFrequency}
+                      onChange={handleSliderChange}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb 100%)`
+                      }}
+                    />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>0Hz</span>
+                      <span>30Hz</span>
+                      <span>60Hz</span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Manual Input */}
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Manual:</label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="60"
-                    value={tempFrequency}
-                    onChange={handleFrequencyInput}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="0-60"
-                  />
-                  <span className="text-sm text-gray-600">Hz</span>
+                  {/* Manual Input - 2/10 width */}
+                  <div className="flex-[2] flex flex-col items-center gap-1">
+                    <label className="text-xs text-gray-600">Manual</label>
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min="0"
+                        max="60"
+                        value={tempFrequency}
+                        onChange={handleFrequencyInput}
+                        className="px-2 py-1 border border-gray-300 rounded-md text-sm w-16 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                        placeholder="0-60"
+                      />
+                      <span className="text-xs text-gray-600">Hz</span>
+                    </div>
+                  </div>
                 </div>
                 
                 <p className="text-xs text-gray-500">
