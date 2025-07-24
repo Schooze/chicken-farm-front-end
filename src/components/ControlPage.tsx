@@ -9,10 +9,12 @@ interface FarmControls {
   fan: boolean;
   fanFrequency: number;
   feeder: boolean;
-  coolingPad: boolean;
+  coolingPad1: boolean;
+  coolingPad2: boolean;
   lastFanToggle?: Date;
   lastFeederToggle?: Date;
-  lastCoolingPadToggle?: Date;
+  lastCoolingPad1Toggle?: Date;
+  lastCoolingPad2Toggle?: Date;
 }
 
 interface Farm {
@@ -26,17 +28,17 @@ export const ControlPage: React.FC = () => {
     { 
       id: 'alpha', 
       name: 'Farm Alpha', 
-      controls: { fan: false, fanFrequency: 0, feeder: false, coolingPad: false } 
+      controls: { fan: false, fanFrequency: 0, feeder: false, coolingPad1: false, coolingPad2: false } 
     },
     { 
       id: 'beta', 
       name: 'Farm Beta', 
-      controls: { fan: true, fanFrequency: 30, feeder: false, coolingPad: true } 
+      controls: { fan: true, fanFrequency: 30, feeder: false, coolingPad1: true, coolingPad2: false } 
     },
     { 
       id: 'gamma', 
       name: 'Farm Gamma', 
-      controls: { fan: false, fanFrequency: 0, feeder: true, coolingPad: false } 
+      controls: { fan: false, fanFrequency: 0, feeder: true, coolingPad1: false, coolingPad2: true } 
     }
   ]);
 
@@ -44,7 +46,7 @@ export const ControlPage: React.FC = () => {
   const [tempFrequency, setTempFrequency] = useState<string>('');
   const selectedFarm = farms.find(farm => farm.id === selectedFarmId);
 
-  const handleControlToggle = (controlType: 'fan' | 'feeder' | 'coolingPad') => {
+  const handleControlToggle = (controlType: 'fan' | 'feeder' | 'coolingPad1' | 'coolingPad2') => {
     setFarms(currentFarms => 
       currentFarms.map(farm => 
         farm.id === selectedFarmId 
@@ -204,14 +206,22 @@ export const ControlPage: React.FC = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Snowflake className={`h-4 w-4 ${farm.controls.coolingPad ? 'text-cyan-500' : 'text-gray-400'}`} />
+                          <Snowflake className={`h-4 w-4 ${farm.controls.coolingPad1 || farm.controls.coolingPad2 ? 'text-cyan-500' : 'text-gray-400'}`} />
                           <span className="text-sm">Cooling</span>
+                          <div className="flex gap-1">
+                            {farm.controls.coolingPad1 && (
+                              <span className="text-xs text-cyan-600 bg-cyan-100 px-1 rounded">1</span>
+                            )}
+                            {farm.controls.coolingPad2 && (
+                              <span className="text-xs text-cyan-600 bg-cyan-100 px-1 rounded">2</span>
+                            )}
+                          </div>
                         </div>
                         <Badge 
-                          variant={getStatusColor(farm.controls.coolingPad) as any}
-                          className={`text-xs ${farm.controls.coolingPad ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                          variant={getStatusColor(farm.controls.coolingPad1 || farm.controls.coolingPad2) as any}
+                          className={`text-xs ${(farm.controls.coolingPad1 || farm.controls.coolingPad2) ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
                         >
-                          {getStatusText(farm.controls.coolingPad)}
+                          {getStatusText(farm.controls.coolingPad1 || farm.controls.coolingPad2)}
                         </Badge>
                       </div>
                     </div>
@@ -231,7 +241,7 @@ export const ControlPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
-                Exhaust Fan Control
+                Fan Control
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -362,7 +372,7 @@ export const ControlPage: React.FC = () => {
           <Card className="hover:shadow-xl transition-all duration-300 bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Snowflake className={`h-6 w-6 ${selectedFarm.controls.coolingPad ? 'text-cyan-500' : 'text-gray-400'}`} />
+                <Snowflake className={`h-6 w-6 ${selectedFarm.controls.coolingPad1 || selectedFarm.controls.coolingPad2 ? 'text-cyan-500' : 'text-gray-400'}`} />
                 Cooling Pad Control
               </CardTitle>
             </CardHeader>
@@ -372,26 +382,47 @@ export const ControlPage: React.FC = () => {
                   <p className="font-medium text-gray-900">Evaporative Cooling</p>
                   <p className="text-sm text-gray-600">Controls temperature reduction</p>
                 </div>
-                <Badge 
-                  variant={getStatusColor(selectedFarm.controls.coolingPad) as any}
-                  className={`text-sm px-3 py-1 ${selectedFarm.controls.coolingPad ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                >
-                  {getStatusText(selectedFarm.controls.coolingPad)}
-                </Badge>
+                <div className="flex gap-2">
+                  {selectedFarm.controls.coolingPad1 && (
+                    <Badge className="text-xs bg-cyan-500 text-white">PAD 1</Badge>
+                  )}
+                  {selectedFarm.controls.coolingPad2 && (
+                    <Badge className="text-xs bg-cyan-500 text-white">PAD 2</Badge>
+                  )}
+                  {!selectedFarm.controls.coolingPad1 && !selectedFarm.controls.coolingPad2 && (
+                    <Badge variant="secondary" className="text-xs">OFF</Badge>
+                  )}
+                </div>
               </div>
               
+              {/* Cooling Pad 1 Button */}
               <Button 
-                variant={selectedFarm.controls.coolingPad ? 'destructive' : 'default'}
+                variant={selectedFarm.controls.coolingPad1 ? 'destructive' : 'default'}
                 size="lg"
-                onClick={() => handleControlToggle('coolingPad')}
+                onClick={() => handleControlToggle('coolingPad1')}
                 className={`w-full transition-all duration-300 text-white ${
-                  selectedFarm.controls.coolingPad 
+                  selectedFarm.controls.coolingPad1 
                     ? 'bg-red-600 hover:bg-red-700' 
                     : 'bg-cyan-600 hover:bg-cyan-700'
                 }`}
               >
                 <Snowflake className="h-4 w-4 mr-2" />
-                Turn {selectedFarm.controls.coolingPad ? 'OFF' : 'ON'} Cooling
+                Turn {selectedFarm.controls.coolingPad1 ? 'OFF' : 'ON'} Cooling Pad 1
+              </Button>
+
+              {/* Cooling Pad 2 Button */}
+              <Button 
+                variant={selectedFarm.controls.coolingPad2 ? 'destructive' : 'default'}
+                size="lg"
+                onClick={() => handleControlToggle('coolingPad2')}
+                className={`w-full transition-all duration-300 text-white ${
+                  selectedFarm.controls.coolingPad2 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-cyan-600 hover:bg-cyan-700'
+                }`}
+              >
+                <Snowflake className="h-4 w-4 mr-2" />
+                Turn {selectedFarm.controls.coolingPad2 ? 'OFF' : 'ON'} Cooling Pad 2
               </Button>
 
               <div className="p-3 rounded-lg bg-cyan-50/50 border border-cyan-200">
@@ -400,16 +431,25 @@ export const ControlPage: React.FC = () => {
                   <span className="text-sm font-medium text-cyan-700">Cooling System Info</span>
                 </div>
                 <p className="text-xs text-cyan-600">
-                  Evaporative cooling system helps reduce ambient temperature by 5-10°C through water evaporation
+                  Dual evaporative cooling system helps reduce ambient temperature by 5-10°C through water evaporation. Use both pads for maximum cooling efficiency.
                 </p>
               </div>
 
-              {selectedFarm.controls.lastCoolingPadToggle && (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
-                  <Clock className="h-3 w-3" />
-                  Last toggled: {selectedFarm.controls.lastCoolingPadToggle.toLocaleTimeString()}
-                </div>
-              )}
+              {/* Last Toggle Times */}
+              <div className="space-y-1">
+                {selectedFarm.controls.lastCoolingPad1Toggle && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Clock className="h-3 w-3" />
+                    Pad 1 last toggled: {selectedFarm.controls.lastCoolingPad1Toggle.toLocaleTimeString()}
+                  </div>
+                )}
+                {selectedFarm.controls.lastCoolingPad2Toggle && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Clock className="h-3 w-3" />
+                    Pad 2 last toggled: {selectedFarm.controls.lastCoolingPad2Toggle.toLocaleTimeString()}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
