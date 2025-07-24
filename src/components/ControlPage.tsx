@@ -51,7 +51,8 @@ export const ControlPage: React.FC = () => {
               controls: {
                 ...farm.controls,
                 [controlType]: !farm.controls[controlType],
-                ...(controlType === 'fan' && !farm.controls.fan ? { fanFrequency: 0 } : {}),
+                // Ketika fan dimatikan, set frequency ke 0
+                ...(controlType === 'fan' && farm.controls.fan ? { fanFrequency: 0 } : {}),
                 [`last${controlType.charAt(0).toUpperCase() + controlType.slice(1)}Toggle`]: new Date()
               }
             }
@@ -72,7 +73,8 @@ export const ControlPage: React.FC = () => {
               controls: {
                 ...farm.controls,
                 fanFrequency: clampedValue,
-                fan: clampedValue > 0, // Auto turn on fan if frequency > 0
+                // Fan hidup hanya jika frequency > 0
+                fan: clampedValue > 0,
                 lastFanToggle: new Date()
               }
             }
