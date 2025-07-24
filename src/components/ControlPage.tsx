@@ -61,8 +61,8 @@ export const ControlPage: React.FC = () => {
   };
 
   const handleFrequencyChange = (value: number) => {
-    // Ensure value is within 0-60Hz range
-    const clampedValue = Math.max(0, Math.min(60, value));
+    // Ensure value is within 0-50Hz range
+    const clampedValue = Math.max(0, Math.min(50, value));
     
     setFarms(currentFarms => 
       currentFarms.map(farm => 
@@ -107,18 +107,18 @@ export const ControlPage: React.FC = () => {
   }, [selectedFarmId, selectedFarm?.controls.fanFrequency]);
 
   return (
-    <div className="min-h-screen bg-gradient-earth p-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <Settings className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Farm Control Center</h1>
+          <Settings className="h-8 w-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-900">Farm Control Center</h1>
         </div>
-        <p className="text-muted-foreground">Control fans and feeders for all chicken farms</p>
+        <p className="text-gray-600">Control fans and feeders for all chicken farms</p>
       </div>
 
       {/* Farm Selection */}
-      <Card className="mb-8 bg-card/80 backdrop-blur-sm shadow-farm">
+      <Card className="mb-8 bg-white/80 backdrop-blur-sm shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -145,7 +145,7 @@ export const ControlPage: React.FC = () => {
       {selectedFarm && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Fan Control */}
-          <Card className="hover:shadow-elevated transition-all duration-300 bg-card/80 backdrop-blur-sm">
+          <Card className="hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
@@ -199,18 +199,18 @@ export const ControlPage: React.FC = () => {
                     <input
                       type="range"
                       min="0"
-                      max="60"
+                      max="50"
                       value={selectedFarm.controls.fanFrequency}
                       onChange={handleSliderChange}
                       className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                       style={{
-                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb 100%)`
+                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(selectedFarm.controls.fanFrequency / 50) * 100}%, #e5e7eb ${(selectedFarm.controls.fanFrequency / 50) * 100}%, #e5e7eb 100%)`
                       }}
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>0Hz</span>
-                      <span>30Hz</span>
-                      <span>60Hz</span>
+                      <span>25Hz</span>
+                      <span>50Hz</span>
                     </div>
                   </div>
 
@@ -221,11 +221,11 @@ export const ControlPage: React.FC = () => {
                       <input
                         type="number"
                         min="0"
-                        max="60"
+                        max="50"
                         value={tempFrequency}
                         onChange={handleFrequencyInput}
                         className="px-2 py-1 border border-gray-300 rounded-md text-sm w-16 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
-                        placeholder="0-60"
+                        placeholder="0-50"
                       />
                       <span className="text-xs text-gray-600">Hz</span>
                     </div>
@@ -233,12 +233,12 @@ export const ControlPage: React.FC = () => {
                 </div>
                 
                 <p className="text-xs text-gray-500">
-                  Range: 0-60Hz. Values outside this range will be automatically adjusted.
+                  Range: 0-50Hz. Values outside this range will be automatically adjusted.
                 </p>
               </div>
 
               {selectedFarm.controls.lastFanToggle && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Clock className="h-3 w-3" />
                   Last updated: {selectedFarm.controls.lastFanToggle.toLocaleTimeString()}
                 </div>
@@ -250,15 +250,15 @@ export const ControlPage: React.FC = () => {
           <Card className="hover:shadow-xl transition-all duration-300 bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Utensils className={`h-6 w-6 ${selectedFarm.controls.feeder ? 'text-warning' : 'text-muted-foreground'}`} />
+                <Utensils className={`h-6 w-6 ${selectedFarm.controls.feeder ? 'text-orange-500' : 'text-gray-400'}`} />
                 Feeder Control
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-ammonia bg-opacity-10">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-orange-50">
                 <div>
-                  <p className="font-medium text-foreground">Automatic Feeder</p>
-                  <p className="text-sm text-muted-foreground">Controls food dispensing</p>
+                  <p className="font-medium text-gray-900">Automatic Feeder</p>
+                  <p className="text-sm text-gray-600">Controls food dispensing</p>
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.feeder) as any}
@@ -269,10 +269,14 @@ export const ControlPage: React.FC = () => {
               </div>
               
               <Button 
-                variant={selectedFarm.controls.feeder ? 'danger' : 'success'}
+                variant={selectedFarm.controls.feeder ? 'destructive' : 'default'}
                 size="lg"
                 onClick={() => handleControlToggle('feeder')}
-                className="w-full transition-all duration-300"
+                className={`w-full transition-all duration-300 text-white ${
+                  selectedFarm.controls.feeder 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
               >
                 <Power className="h-4 w-4 mr-2" />
                 Turn {selectedFarm.controls.feeder ? 'OFF' : 'ON'} Feeder
@@ -290,7 +294,7 @@ export const ControlPage: React.FC = () => {
       )}
 
       {/* Status Overview */}
-      <Card className="bg-card/80 backdrop-blur-sm shadow-farm">
+      <Card className="bg-white/80 backdrop-blur-sm shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -304,18 +308,18 @@ export const ControlPage: React.FC = () => {
                 key={farm.id} 
                 className={`p-4 rounded-lg border transition-all duration-300 ${
                   farm.id === selectedFarmId 
-                    ? 'border-primary bg-primary/5 shadow-glow-success' 
-                    : 'border-border bg-background/50'
+                    ? 'border-blue-500 bg-blue-50 shadow-md' 
+                    : 'border-gray-200 bg-white/50'
                 }`}
               >
-                <h3 className="font-semibold text-foreground mb-3">{farm.name}</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{farm.name}</h3>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Fan className={`h-4 w-4 ${farm.controls.fan ? 'animate-spin text-accent' : 'text-muted-foreground'}`} />
+                      <Fan className={`h-4 w-4 ${farm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
                       <span className="text-sm">Fan</span>
                       {farm.controls.fan && (
-                        <span className="text-xs text-muted-foreground">({farm.controls.fanFrequency}Hz)</span>
+                        <span className="text-xs text-gray-500">({farm.controls.fanFrequency}Hz)</span>
                       )}
                     </div>
                     <Badge 
@@ -327,7 +331,7 @@ export const ControlPage: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Utensils className={`h-4 w-4 ${farm.controls.feeder ? 'text-warning' : 'text-muted-foreground'}`} />
+                      <Utensils className={`h-4 w-4 ${farm.controls.feeder ? 'text-orange-500' : 'text-gray-400'}`} />
                       <span className="text-sm">Feeder</span>
                     </div>
                     <Badge 
