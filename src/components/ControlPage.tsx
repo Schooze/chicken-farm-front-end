@@ -3,14 +3,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Fan, Utensils, Power, Settings, Activity, Clock } from 'lucide-react';
+import { Fan, Utensils, Power, Settings, Activity, Clock, Snowflake } from 'lucide-react';
 
 interface FarmControls {
   fan: boolean;
   fanFrequency: number;
   feeder: boolean;
+  coolingPad: boolean;
   lastFanToggle?: Date;
   lastFeederToggle?: Date;
+  lastCoolingPadToggle?: Date;
 }
 
 interface Farm {
@@ -24,17 +26,17 @@ export const ControlPage: React.FC = () => {
     { 
       id: 'alpha', 
       name: 'Farm Alpha', 
-      controls: { fan: false, fanFrequency: 0, feeder: false } 
+      controls: { fan: false, fanFrequency: 0, feeder: false, coolingPad: false } 
     },
     { 
       id: 'beta', 
       name: 'Farm Beta', 
-      controls: { fan: true, fanFrequency: 30, feeder: false } 
+      controls: { fan: true, fanFrequency: 30, feeder: false, coolingPad: true } 
     },
     { 
       id: 'gamma', 
       name: 'Farm Gamma', 
-      controls: { fan: false, fanFrequency: 0, feeder: true } 
+      controls: { fan: false, fanFrequency: 0, feeder: true, coolingPad: false } 
     }
   ]);
 
@@ -42,7 +44,7 @@ export const ControlPage: React.FC = () => {
   const [tempFrequency, setTempFrequency] = useState<string>('');
   const selectedFarm = farms.find(farm => farm.id === selectedFarmId);
 
-  const handleControlToggle = (controlType: 'fan' | 'feeder') => {
+  const handleControlToggle = (controlType: 'fan' | 'feeder' | 'coolingPad') => {
     setFarms(currentFarms => 
       currentFarms.map(farm => 
         farm.id === selectedFarmId 
@@ -120,7 +122,7 @@ export const ControlPage: React.FC = () => {
           <Settings className="h-8 w-8 text-blue-600" />
           <h1 className="text-3xl font-bold text-gray-900">Farm Control Center</h1>
         </div>
-        <p className="text-gray-600">Control fans and feeders for all chicken farms</p>
+        <p className="text-gray-600">Control fans, feeders, and cooling systems for all chicken farms</p>
       </div>
 
       {/* Farm Selection and Status Overview - Side by Side */}
@@ -200,6 +202,18 @@ export const ControlPage: React.FC = () => {
                           {getStatusText(farm.controls.feeder)}
                         </Badge>
                       </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Snowflake className={`h-4 w-4 ${farm.controls.coolingPad ? 'text-cyan-500' : 'text-gray-400'}`} />
+                          <span className="text-sm">Cooling</span>
+                        </div>
+                        <Badge 
+                          variant={getStatusColor(farm.controls.coolingPad) as any}
+                          className={`text-xs ${farm.controls.coolingPad ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                        >
+                          {getStatusText(farm.controls.coolingPad)}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -211,13 +225,13 @@ export const ControlPage: React.FC = () => {
 
       {/* Control Panel */}
       {selectedFarm && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Fan Control */}
           <Card className="hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
-                Fan Control
+                Exhaust Fan Control
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -233,21 +247,6 @@ export const ControlPage: React.FC = () => {
                   {getStatusText(selectedFarm.controls.fan)}
                 </Badge>
               </div>
-              
-              {/* On/Off Toggle */}
-              {/* <Button 
-                variant={selectedFarm.controls.fan ? 'destructive' : 'default'}
-                size="lg"
-                onClick={() => handleControlToggle('fan')}
-                className={`w-full transition-all duration-300 text-white ${
-                  selectedFarm.controls.fan 
-                    ? 'bg-red-600 hover:bg-red-700' 
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                <Power className="h-4 w-4 mr-2" />
-                Turn {selectedFarm.controls.fan ? 'OFF' : 'ON'} Fan
-              </Button> */}
 
               {/* Frequency Control */}
               <div className="space-y-4 p-4 rounded-lg bg-gray-50">
@@ -354,6 +353,61 @@ export const ControlPage: React.FC = () => {
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Clock className="h-3 w-3" />
                   Last toggled: {selectedFarm.controls.lastFeederToggle.toLocaleTimeString()}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Cooling Pad Control */}
+          <Card className="hover:shadow-xl transition-all duration-300 bg-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Snowflake className={`h-6 w-6 ${selectedFarm.controls.coolingPad ? 'text-cyan-500' : 'text-gray-400'}`} />
+                Cooling Pad Control
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-cyan-50">
+                <div>
+                  <p className="font-medium text-gray-900">Evaporative Cooling</p>
+                  <p className="text-sm text-gray-600">Controls temperature reduction</p>
+                </div>
+                <Badge 
+                  variant={getStatusColor(selectedFarm.controls.coolingPad) as any}
+                  className={`text-sm px-3 py-1 ${selectedFarm.controls.coolingPad ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                >
+                  {getStatusText(selectedFarm.controls.coolingPad)}
+                </Badge>
+              </div>
+              
+              <Button 
+                variant={selectedFarm.controls.coolingPad ? 'destructive' : 'default'}
+                size="lg"
+                onClick={() => handleControlToggle('coolingPad')}
+                className={`w-full transition-all duration-300 text-white ${
+                  selectedFarm.controls.coolingPad 
+                    ? 'bg-red-600 hover:bg-red-700' 
+                    : 'bg-cyan-600 hover:bg-cyan-700'
+                }`}
+              >
+                <Snowflake className="h-4 w-4 mr-2" />
+                Turn {selectedFarm.controls.coolingPad ? 'OFF' : 'ON'} Cooling
+              </Button>
+
+              <div className="p-3 rounded-lg bg-cyan-50/50 border border-cyan-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Snowflake className="h-4 w-4 text-cyan-500" />
+                  <span className="text-sm font-medium text-cyan-700">Cooling System Info</span>
+                </div>
+                <p className="text-xs text-cyan-600">
+                  Evaporative cooling system helps reduce ambient temperature by 5-10°C through water evaporation
+                </p>
+              </div>
+
+              {selectedFarm.controls.lastCoolingPadToggle && (
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Clock className="h-3 w-3" />
+                  Last toggled: {selectedFarm.controls.lastCoolingPadToggle.toLocaleTimeString()}
                 </div>
               )}
             </CardContent>
