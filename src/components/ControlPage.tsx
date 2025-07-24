@@ -7,6 +7,7 @@ import { Fan, Utensils, Power, Settings, Activity, Clock } from 'lucide-react';
 
 interface FarmControls {
   fan: boolean;
+  fanFrequency: number;
   feeder: boolean;
   lastFanToggle?: Date;
   lastFeederToggle?: Date;
@@ -23,21 +24,22 @@ export const ControlPage: React.FC = () => {
     { 
       id: 'alpha', 
       name: 'Farm Alpha', 
-      controls: { fan: false, feeder: false } 
+      controls: { fan: false, fanFrequency: 0, feeder: false } 
     },
     { 
       id: 'beta', 
       name: 'Farm Beta', 
-      controls: { fan: true, feeder: false } 
+      controls: { fan: true, fanFrequency: 30, feeder: false } 
     },
     { 
       id: 'gamma', 
       name: 'Farm Gamma', 
-      controls: { fan: false, feeder: true } 
+      controls: { fan: false, fanFrequency: 0, feeder: true } 
     }
   ]);
 
   const [selectedFarmId, setSelectedFarmId] = useState<string>('alpha');
+  const [tempFrequency, setTempFrequency] = useState<string>('');
   const selectedFarm = farms.find(farm => farm.id === selectedFarmId);
 
   const handleControlToggle = (controlType: 'fan' | 'feeder') => {
@@ -49,6 +51,7 @@ export const ControlPage: React.FC = () => {
               controls: {
                 ...farm.controls,
                 [controlType]: !farm.controls[controlType],
+                ...(controlType === 'fan' && !farm.controls.fan ? { fanFrequency: 0 } : {}),
                 [`last${controlType.charAt(0).toUpperCase() + controlType.slice(1)}Toggle`]: new Date()
               }
             }
@@ -57,8 +60,51 @@ export const ControlPage: React.FC = () => {
     );
   };
 
+  const handleFrequencyChange = (value: number) => {
+    // Ensure value is within 0-60Hz range
+    const clampedValue = Math.max(0, Math.min(60, value));
+    
+    setFarms(currentFarms => 
+      currentFarms.map(farm => 
+        farm.id === selectedFarmId 
+          ? {
+              ...farm,
+              controls: {
+                ...farm.controls,
+                fanFrequency: clampedValue,
+                fan: clampedValue > 0, // Auto turn on fan if frequency > 0
+                lastFanToggle: new Date()
+              }
+            }
+          : farm
+      )
+    );
+  };
+
+  const handleFrequencyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTempFrequency(value);
+    
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue)) {
+      handleFrequencyChange(numValue);
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    handleFrequencyChange(value);
+    setTempFrequency(value.toString());
+  };
+
   const getStatusColor = (isActive: boolean) => isActive ? 'success' : 'secondary';
   const getStatusText = (isActive: boolean) => isActive ? 'ON' : 'OFF';
+
+  React.useEffect(() => {
+    if (selectedFarm) {
+      setTempFrequency(selectedFarm.controls.fanFrequency.toString());
+    }
+  }, [selectedFarmId, selectedFarm?.controls.fanFrequency]);
 
   return (
     <div className="min-h-screen bg-gradient-earth p-6">
@@ -99,18 +145,18 @@ export const ControlPage: React.FC = () => {
       {selectedFarm && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Fan Control */}
-          <Card className="hover:shadow-elevated transition-all duration-300 bg-card/80 backdrop-blur-sm">
+          <Card className="hover:shadow-xl transition-all duration-300 bg-white">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-accent' : 'text-muted-foreground'}`} />
+                <Fan className={`h-6 w-6 ${selectedFarm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
                 Fan Control
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-tech bg-opacity-10">
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between p-4 rounded-lg bg-blue-50">
                 <div>
-                  <p className="font-medium text-foreground">Ventilation Fan</p>
-                  <p className="text-sm text-muted-foreground">Controls air circulation</p>
+                  <p className="font-medium text-gray-900">Ventilation Fan</p>
+                  <p className="text-sm text-gray-600">Controls air circulation</p>
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.fan) as any}
@@ -120,20 +166,72 @@ export const ControlPage: React.FC = () => {
                 </Badge>
               </div>
               
+              {/* On/Off Toggle */}
               <Button 
-                variant={selectedFarm.controls.fan ? 'danger' : 'success'}
+                variant={selectedFarm.controls.fan ? 'destructive' : 'default'}
                 size="lg"
                 onClick={() => handleControlToggle('fan')}
-                className="w-full transition-all duration-300"
+                className="w-full transition-all duration-300 bg-green-600 hover:bg-green-700 text-white"
               >
                 <Power className="h-4 w-4 mr-2" />
                 Turn {selectedFarm.controls.fan ? 'OFF' : 'ON'} Fan
               </Button>
 
+              {/* Frequency Control */}
+              <div className="space-y-4 p-4 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700">
+                    Frequency Control
+                  </label>
+                  <span className="text-sm text-gray-600">
+                    {selectedFarm.controls.fanFrequency}Hz
+                  </span>
+                </div>
+                
+                {/* Slider */}
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0"
+                    max="60"
+                    value={selectedFarm.controls.fanFrequency}
+                    onChange={handleSliderChange}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    style={{
+                      background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb ${(selectedFarm.controls.fanFrequency / 60) * 100}%, #e5e7eb 100%)`
+                    }}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>0Hz</span>
+                    <span>30Hz</span>
+                    <span>60Hz</span>
+                  </div>
+                </div>
+
+                {/* Manual Input */}
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-gray-600">Manual:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="60"
+                    value={tempFrequency}
+                    onChange={handleFrequencyInput}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="0-60"
+                  />
+                  <span className="text-sm text-gray-600">Hz</span>
+                </div>
+                
+                <p className="text-xs text-gray-500">
+                  Range: 0-60Hz. Values outside this range will be automatically adjusted.
+                </p>
+              </div>
+
               {selectedFarm.controls.lastFanToggle && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-gray-500">
                   <Clock className="h-3 w-3" />
-                  Last toggled: {selectedFarm.controls.lastFanToggle.toLocaleTimeString()}
+                  Last updated: {selectedFarm.controls.lastFanToggle.toLocaleTimeString()}
                 </div>
               )}
             </CardContent>
@@ -207,6 +305,9 @@ export const ControlPage: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <Fan className={`h-4 w-4 ${farm.controls.fan ? 'animate-spin text-accent' : 'text-muted-foreground'}`} />
                       <span className="text-sm">Fan</span>
+                      {farm.controls.fan && (
+                        <span className="text-xs text-muted-foreground">({farm.controls.fanFrequency}Hz)</span>
+                      )}
                     </div>
                     <Badge 
                       variant={getStatusColor(farm.controls.fan) as any}
@@ -233,6 +334,29 @@ export const ControlPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #3b82f6;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #3b82f6;
+          cursor: pointer;
+          border: 2px solid #ffffff;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+      `}</style>
     </div>
   );
-};
+}
