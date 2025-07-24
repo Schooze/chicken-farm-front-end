@@ -121,29 +121,91 @@ export const ControlPage: React.FC = () => {
         <p className="text-gray-600">Control fans and feeders for all chicken farms</p>
       </div>
 
-      {/* Farm Selection */}
-      <Card className="mb-8 bg-white/80 backdrop-blur-sm shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            Select Farm
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedFarmId} onValueChange={setSelectedFarmId}>
-            <SelectTrigger className="w-full max-w-xs">
-              <SelectValue placeholder="Choose a farm to control" />
-            </SelectTrigger>
-            <SelectContent>
-              {farms.map((farm) => (
-                <SelectItem key={farm.id} value={farm.id}>
-                  {farm.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+      {/* Farm Selection and Status Overview - Side by Side */}
+      <div className="grid grid-cols-10 gap-6 mb-8">
+        {/* Farm Selection - 2/10 */}
+        <div className="col-span-2">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Select Farm
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedFarmId} onValueChange={setSelectedFarmId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a farm to control" />
+                </SelectTrigger>
+                <SelectContent>
+                  {farms.map((farm) => (
+                    <SelectItem key={farm.id} value={farm.id}>
+                      {farm.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Status Overview - 8/10 */}
+        <div className="col-span-8">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                All Farms Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {farms.map((farm) => (
+                  <div 
+                    key={farm.id} 
+                    className={`p-4 rounded-lg border transition-all duration-300 ${
+                      farm.id === selectedFarmId 
+                        ? 'border-blue-500 bg-blue-50 shadow-md' 
+                        : 'border-gray-200 bg-white/50'
+                    }`}
+                  >
+                    <h3 className="font-semibold text-gray-900 mb-3">{farm.name}</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Fan className={`h-4 w-4 ${farm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
+                          <span className="text-sm">Fan</span>
+                          {farm.controls.fan && (
+                            <span className="text-xs text-gray-500">({farm.controls.fanFrequency}Hz)</span>
+                          )}
+                        </div>
+                        <Badge 
+                          variant={getStatusColor(farm.controls.fan) as any}
+                          className={`text-xs ${farm.controls.fan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                        >
+                          {getStatusText(farm.controls.fan)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Utensils className={`h-4 w-4 ${farm.controls.feeder ? 'text-orange-500' : 'text-gray-400'}`} />
+                          <span className="text-sm">Feeder</span>
+                        </div>
+                        <Badge 
+                          variant={getStatusColor(farm.controls.feeder) as any}
+                          className={`text-xs ${farm.controls.feeder ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
+                        >
+                          {getStatusText(farm.controls.feeder)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Control Panel */}
       {selectedFarm && (
@@ -297,61 +359,6 @@ export const ControlPage: React.FC = () => {
         </div>
       )}
 
-      {/* Status Overview */}
-      <Card className="bg-white/80 backdrop-blur-sm shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            All Farms Status
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {farms.map((farm) => (
-              <div 
-                key={farm.id} 
-                className={`p-4 rounded-lg border transition-all duration-300 ${
-                  farm.id === selectedFarmId 
-                    ? 'border-blue-500 bg-blue-50 shadow-md' 
-                    : 'border-gray-200 bg-white/50'
-                }`}
-              >
-                <h3 className="font-semibold text-gray-900 mb-3">{farm.name}</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Fan className={`h-4 w-4 ${farm.controls.fan ? 'animate-spin text-blue-500' : 'text-gray-400'}`} />
-                      <span className="text-sm">Fan</span>
-                      {farm.controls.fan && (
-                        <span className="text-xs text-gray-500">({farm.controls.fanFrequency}Hz)</span>
-                      )}
-                    </div>
-                    <Badge 
-                      variant={getStatusColor(farm.controls.fan) as any}
-                      className={`text-xs ${farm.controls.fan ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                    >
-                      {getStatusText(farm.controls.fan)}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Utensils className={`h-4 w-4 ${farm.controls.feeder ? 'text-orange-500' : 'text-gray-400'}`} />
-                      <span className="text-sm">Feeder</span>
-                    </div>
-                    <Badge 
-                      variant={getStatusColor(farm.controls.feeder) as any}
-                      className={`text-xs ${farm.controls.feeder ? 'bg-green-500 text-white hover:bg-green-600' : ''}`}
-                    >
-                      {getStatusText(farm.controls.feeder)}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       <style jsx>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
@@ -377,3 +384,5 @@ export const ControlPage: React.FC = () => {
     </div>
   );
 }
+
+export default ControlPage;
