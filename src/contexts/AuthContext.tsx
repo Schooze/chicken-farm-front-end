@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/users/me', {
+      const response = await fetch('http://192.168.100.30:8000/api/auth/users/me', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await fetch('http://localhost:8000/api/auth/token', {
+    const response = await fetch('http://192.168.100.30:8000/api/auth/token', {
       method: 'POST',
       body: formData,
     });

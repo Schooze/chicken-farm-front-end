@@ -46,7 +46,7 @@ const AnakKandangPage: React.FC = () => {
 
   const fetchFarms = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/company/farms', {
+      const response = await fetch('http://192.168.100.30:8000/api/company/farms', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +72,7 @@ const AnakKandangPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/auth/anak-kandang/manual-input', {
+      const response = await fetch('http://192.168.100.30:8000/api/auth/anak-kandang/manual-input', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

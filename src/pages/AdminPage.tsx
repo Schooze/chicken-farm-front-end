@@ -54,7 +54,7 @@ const AdminPage: React.FC = () => {
 
   const fetchAdminData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/stats', {
+      const response = await fetch('http://192.168.100.30:8000/api/admin/stats', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -71,7 +71,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8000/api/auth/admin/companies?name=${encodeURIComponent(newCompanyName)}`, {
+      const response = await fetch(`http://192.168.100.30:8000/api/auth/admin/companies?name=${encodeURIComponent(newCompanyName)}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -97,7 +97,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/auth/admin/users', {
+      const response = await fetch('http://192.168.100.30:8000/api/auth/admin/users', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -128,7 +128,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/auth/admin/farms', {
+      const response = await fetch('http://192.168.100.30:8000/api/auth/admin/farms', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

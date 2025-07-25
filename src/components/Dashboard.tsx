@@ -246,7 +246,7 @@ export const Dashboard: React.FC = () => {
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/company/dashboard-data', {
+      const response = await fetch('http://192.168.100.30:8000/api/company/dashboard-data', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
