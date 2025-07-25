@@ -1,6 +1,9 @@
 // src/config.ts
 
-export const API_BASE_URL = 'http://192.168.100.30:8000';
+// export const API_BASE_URL = 'http://192.168.100.30:8000';
+export const API_BASE_URL = 'https://api.reinutechiot.com';
+
+
 
 export const API_ENDPOINTS = {
   // Auth endpoints

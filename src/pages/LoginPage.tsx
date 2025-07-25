@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Activity, Lock, User, AlertCircle } from 'lucide-react';
+import { Activity, Lock, User, AlertCircle, IdCard } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
             <div className="p-3 rounded-full bg-green-100">
-              <Activity className="h-8 w-8 text-green-600" />
+              <IdCard className="h-8 w-8 text-green-600" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-center">
