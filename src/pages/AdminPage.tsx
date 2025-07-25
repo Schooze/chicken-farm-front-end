@@ -135,8 +135,10 @@ const AdminPage: React.FC = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...newFarm,
-          company_id: parseInt(newFarm.company_id)
+          company_id: parseInt(newFarm.company_id),
+          name: newFarm.name,
+          location: newFarm.location,
+          fan_count: newFarm.fan_count
         })
       });
       
@@ -146,10 +148,49 @@ const AdminPage: React.FC = () => {
         fetchAdminData();
       } else {
         const data = await response.json();
-        setError(data.detail || 'Failed to create farm');
+        console.error('Farm creation error:', data);
+        
+        // Handle different types of error responses
+        if (data.detail) {
+          // Simple error message
+          if (typeof data.detail === 'string') {
+            setError(data.detail);
+          } 
+          // Validation error array
+          else if (Array.isArray(data.detail)) {
+            const errorMessages = data.detail.map((err: any) => {
+              if (typeof err === 'object' && err.msg) {
+                return `${err.loc ? err.loc.join('.') + ': ' : ''}${err.msg}`;
+              }
+              return String(err);
+            });
+            setError(errorMessages.join(', '));
+          }
+          // Single validation error object
+          else if (typeof data.detail === 'object' && data.detail.msg) {
+            setError(`${data.detail.loc ? data.detail.loc.join('.') + ': ' : ''}${data.detail.msg}`);
+          }
+          else {
+            setError('Failed to create farm');
+          }
+        }
+        // If no detail, check for other error formats
+        else if (Array.isArray(data)) {
+          const errorMessages = data.map((err: any) => {
+            if (typeof err === 'object' && err.msg) {
+              return `${err.loc ? err.loc.join('.') + ': ' : ''}${err.msg}`;
+            }
+            return String(err);
+          });
+          setError(errorMessages.join(', '));
+        }
+        else {
+          setError('Failed to create farm');
+        }
       }
     } catch (error) {
-      setError('Failed to create farm');
+      console.error('Network error:', error);
+      setError('Network error: Failed to create farm');
     } finally {
       setLoading(false);
     }
@@ -289,7 +330,7 @@ const AdminPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {error && (
-                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>
                 )}
                 <div className="space-y-4">
                   <div>
@@ -302,7 +343,7 @@ const AdminPage: React.FC = () => {
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={handleCreateCompany} disabled={loading}>
-                      Create
+                      {loading ? 'Creating...' : 'Create'}
                     </Button>
                     <Button variant="outline" onClick={() => {
                       setShowCreateCompany(false);
@@ -327,7 +368,7 @@ const AdminPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {error && (
-                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm">{error}</div>
                 )}
                 <div className="space-y-4">
                   <div>
@@ -395,7 +436,7 @@ const AdminPage: React.FC = () => {
                   )}
                   <div className="flex gap-2">
                     <Button onClick={handleCreateUser} disabled={loading}>
-                      Create
+                      {loading ? 'Creating...' : 'Create'}
                     </Button>
                     <Button variant="outline" onClick={() => {
                       setShowCreateUser(false);
@@ -420,11 +461,13 @@ const AdminPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {error && (
-                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>
+                  <div className="mb-4 p-3 bg-red-100 text-red-700 rounded text-sm max-h-32 overflow-y-auto">
+                    {error}
+                  </div>
                 )}
                 <div className="space-y-4">
                   <div>
-                    <Label>Company</Label>
+                    <Label>Company *</Label>
                     <Select
                       value={newFarm.company_id}
                       onValueChange={(value) => setNewFarm({ ...newFarm, company_id: value })}
@@ -442,7 +485,7 @@ const AdminPage: React.FC = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label>Farm Name</Label>
+                    <Label>Farm Name *</Label>
                     <Input
                       value={newFarm.name}
                       onChange={(e) => setNewFarm({ ...newFarm, name: e.target.value })}
@@ -450,7 +493,7 @@ const AdminPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label>Location</Label>
+                    <Label>Location *</Label>
                     <Input
                       value={newFarm.location}
                       onChange={(e) => setNewFarm({ ...newFarm, location: e.target.value })}
@@ -468,8 +511,11 @@ const AdminPage: React.FC = () => {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={handleCreateFarm} disabled={loading}>
-                      Create
+                    <Button 
+                      onClick={handleCreateFarm} 
+                      disabled={loading || !newFarm.company_id || !newFarm.name || !newFarm.location}
+                    >
+                      {loading ? 'Creating...' : 'Create'}
                     </Button>
                     <Button variant="outline" onClick={() => {
                       setShowCreateFarm(false);
