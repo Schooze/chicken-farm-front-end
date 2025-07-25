@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RefreshCw, Settings, AlertTriangle, Thermometer, Droplets, Wind } from 'lucide-react';
-import { AppHeader } from './AppHeader';
+import { RefreshCw, Settings, AlertTriangle, Thermometer, Droplets, Wind, Activity } from 'lucide-react';
 import { useAlerts } from '@/contexts/AlertContext';
-
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface SensorData {
   temperature: number;
@@ -18,9 +17,18 @@ export interface SensorData {
 interface Farm {
   id: number;
   name: string;
-  data: SensorData;
+  location: string;
+  fan_count: number;
+  sensor_data?: any;
+  data?: SensorData;
 }
 
+interface DailyData {
+  farm_name: string;
+  total_chickens: number;
+  total_feed_kg: number;
+  anak_kandang_count: number;
+}
 
 //Function to generate Alert Status
 const generateAlerts = (farms: Farm[]) => {
@@ -28,66 +36,76 @@ const generateAlerts = (farms: Farm[]) => {
   const destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}> = [];
 
   farms.forEach(farm => {
-    const { data } = farm;
+    const data = farm.data || farm.sensor_data;
+    if (!data) return;
     
     // Check temperature
-    const tempStatus = getStatus(data.temperature, 'temperature');
-    if (tempStatus === 'warning') {
-      warnings.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'Temperature',
-        value: `${data.temperature.toFixed(1)}°C`,
-        threshold: '18-25°C'
-      });
-    } else if (tempStatus === 'destructive') {
-      destructive.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'Temperature',
-        value: `${data.temperature.toFixed(1)}°C`,
-        threshold: '18-25°C'
-      });
+    const temp = data.S_TM || data.temperature;
+    if (temp !== undefined) {
+      const tempStatus = getStatus(temp, 'temperature');
+      if (tempStatus === 'warning') {
+        warnings.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Temperature',
+          value: `${temp.toFixed(1)}°C`,
+          threshold: '18-25°C'
+        });
+      } else if (tempStatus === 'destructive') {
+        destructive.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Temperature',
+          value: `${temp.toFixed(1)}°C`,
+          threshold: '18-25°C'
+        });
+      }
     }
 
     // Check humidity
-    const humidityStatus = getStatus(data.humidity, 'humidity');
-    if (humidityStatus === 'warning') {
-      warnings.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'humidity',
-        value: `${data.humidity.toFixed(1)}%`,
-        threshold: '45-65%'
-      });
-    } else if (humidityStatus === 'destructive') {
-      destructive.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'humidity',
-        value: `${data.humidity.toFixed(1)}%`,
-        threshold: '45-65%'
-      });
+    const humidity = data.S_HM || data.humidity;
+    if (humidity !== undefined) {
+      const humidityStatus = getStatus(humidity, 'humidity');
+      if (humidityStatus === 'warning') {
+        warnings.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Humidity',
+          value: `${humidity.toFixed(1)}%`,
+          threshold: '45-65%'
+        });
+      } else if (humidityStatus === 'destructive') {
+        destructive.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Humidity',
+          value: `${humidity.toFixed(1)}%`,
+          threshold: '45-65%'
+        });
+      }
     }
 
     // Check ammonia
-    const ammoniaStatus = getStatus(data.ammonia, 'ammonia');
-    if (ammoniaStatus === 'warning') {
-      warnings.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'Ammonia',
-        value: `${data.ammonia.toFixed(1)} ppm`,
-        threshold: '0-20 ppm'
-      });
-    } else if (ammoniaStatus === 'destructive') {
-      destructive.push({
-        farmId: farm.id,
-        farmName: farm.name,
-        sensor: 'Ammonia',
-        value: `${data.ammonia.toFixed(1)} ppm`,
-        threshold: '0-20 ppm'
-      });
+    const ammonia = data.S_A1 || data.ammonia;
+    if (ammonia !== undefined) {
+      const ammoniaStatus = getStatus(ammonia, 'ammonia');
+      if (ammoniaStatus === 'warning') {
+        warnings.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Ammonia',
+          value: `${ammonia.toFixed(1)} ppm`,
+          threshold: '0-20 ppm'
+        });
+      } else if (ammoniaStatus === 'destructive') {
+        destructive.push({
+          farmId: farm.id,
+          farmName: farm.name,
+          sensor: 'Ammonia',
+          value: `${ammonia.toFixed(1)} ppm`,
+          threshold: '0-20 ppm'
+        });
+      }
     }
   });
 
@@ -110,29 +128,18 @@ const getStatus = (value: number, type: string) => {
     if (value <= 20) return 'success';
     return 'destructive';
   }
+  return 'warning';
 };
 
-// Mock FarmCard component for demo
-const FarmCard = ({ farmId, farmName, data }) => {
-  const getStatusColor = (value, type) => {
-    if (type === 'temperature') {
-      if (value >= 18 && value <= 25) return 'bg-green-500';
-      if (value > 30) return 'bg-red-500';
-      return 'bg-yellow-500';
-    }
-    if (type === 'humidity') {
-      if (value >= 45 && value <= 65) return 'bg-green-500';
-      if (value > 80) return 'bg-red-500';
-      return 'bg-yellow-500';
-    }
-    if (type === 'ammonia') {
-      if (value <= 20) return 'bg-green-500';
-      return 'bg-red-500';
-    }
-  };
+// FarmCard component
+const FarmCard = ({ farm }) => {
+  const data = farm.sensor_data || {};
+  const temperature = data.S_TM || 0;
+  const humidity = data.S_HM || 0;
+  const ammonia = data.S_A1 || 0;
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
+    return new Date().toLocaleTimeString('en-US', { 
       hour: '2-digit', 
       minute: '2-digit',
       second: '2-digit',
@@ -144,26 +151,27 @@ const FarmCard = ({ farmId, farmName, data }) => {
     <Card className="bg-white/90 backdrop-blur-sm border border-gray-200 shadow-lg">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-800">{farmName}</CardTitle>
+          <CardTitle className="text-lg font-semibold text-gray-800">{farm.name}</CardTitle>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
-              getStatus(data.temperature, 'temperature') === 'success' && 
-              getStatus(data.humidity, 'humidity') === 'success' && 
-              getStatus(data.ammonia, 'ammonia') === 'success' 
+              getStatus(temperature, 'temperature') === 'success' && 
+              getStatus(humidity, 'humidity') === 'success' && 
+              getStatus(ammonia, 'ammonia') === 'success' 
                 ? 'bg-green-500' : 'bg-red-500'
             }`}></div>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              getStatus(data.temperature, 'temperature') === 'success' && 
-              getStatus(data.humidity, 'humidity') === 'success' && 
-              getStatus(data.ammonia, 'ammonia') === 'success' 
+              getStatus(temperature, 'temperature') === 'success' && 
+              getStatus(humidity, 'humidity') === 'success' && 
+              getStatus(ammonia, 'ammonia') === 'success' 
                 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
             }`}>
-              {getStatus(data.temperature, 'temperature') === 'success' && 
-               getStatus(data.humidity, 'humidity') === 'success' && 
-               getStatus(data.ammonia, 'ammonia') === 'success' ? 'Normal' : 'Critical'}
+              {getStatus(temperature, 'temperature') === 'success' && 
+               getStatus(humidity, 'humidity') === 'success' && 
+               getStatus(ammonia, 'ammonia') === 'success' ? 'Normal' : 'Critical'}
             </span>
           </div>
         </div>
+        <p className="text-xs text-gray-500">Location: {farm.location}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Temperature */}
@@ -173,13 +181,13 @@ const FarmCard = ({ farmId, farmName, data }) => {
             <span className="text-sm font-medium text-gray-700">Temperature</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-800">{data.temperature.toFixed(1)}°C</span>
+            <span className="text-lg font-bold text-gray-800">{temperature.toFixed(1)}°C</span>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              getStatus(data.temperature, 'temperature') === 'success' ? 'bg-green-100 text-green-800' :
-              getStatus(data.temperature, 'temperature') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+              getStatus(temperature, 'temperature') === 'success' ? 'bg-green-100 text-green-800' :
+              getStatus(temperature, 'temperature') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
               'bg-red-100 text-red-800'
             }`}>
-              {getStatus(data.temperature, 'temperature')}
+              {getStatus(temperature, 'temperature')}
             </span>
           </div>
         </div>
@@ -191,13 +199,13 @@ const FarmCard = ({ farmId, farmName, data }) => {
             <span className="text-sm font-medium text-gray-700">Humidity</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-800">{data.humidity.toFixed(1)}%</span>
+            <span className="text-lg font-bold text-gray-800">{humidity.toFixed(1)}%</span>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              getStatus(data.humidity, 'humidity') === 'success' ? 'bg-green-100 text-green-800' :
-              getStatus(data.humidity, 'humidity') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+              getStatus(humidity, 'humidity') === 'success' ? 'bg-green-100 text-green-800' :
+              getStatus(humidity, 'humidity') === 'warning' ? 'bg-yellow-100 text-yellow-800' :
               'bg-red-100 text-red-800'
             }`}>
-              {getStatus(data.humidity, 'humidity')}
+              {getStatus(humidity, 'humidity')}
             </span>
           </div>
         </div>
@@ -209,115 +217,87 @@ const FarmCard = ({ farmId, farmName, data }) => {
             <span className="text-sm font-medium text-gray-700">Ammonia</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-gray-800">{data.ammonia.toFixed(1)} ppm</span>
+            <span className="text-lg font-bold text-gray-800">{ammonia.toFixed(1)} ppm</span>
             <span className={`text-xs px-2 py-1 rounded-full ${
-              getStatus(data.ammonia, 'ammonia') === 'success' ? 'bg-green-100 text-green-800' :
+              getStatus(ammonia, 'ammonia') === 'success' ? 'bg-green-100 text-green-800' :
               'bg-red-100 text-red-800'
             }`}>
-              {getStatus(data.ammonia, 'ammonia')}
+              {getStatus(ammonia, 'ammonia')}
             </span>
           </div>
         </div>
 
         <div className="text-xs text-gray-500 text-center pt-2 border-t border-gray-200">
-          Last updated: {formatTime(data.lastUpdate)}
+          Last updated: {formatTime(new Date())}
         </div>
       </CardContent>
     </Card>
   );
 };
 
-// const fetchSensorData = async (name: string): Promise<SensorData> => {
-//   // Mock data for demo
-//   return new Promise((resolve) => {
-//     setTimeout(() => {
-//       resolve({
-//         temperature: Math.random() * 15 + 20, // 20-35°C
-//         humidity: Math.random() * 40 + 40,    // 40-80%
-//         ammonia: Math.random() * 25,          // 0-25 ppm
-//         lastUpdate: new Date()
-//       });
-//     }, 500);
-//   });
-// };
-
-// Simulate realistic sensor data with some variation
-const generateSensorData = (): SensorData => ({
-  temperature: 0,
-  humidity: 0,
-  ammonia: 0,
-  lastUpdate: new Date()
-});
-
-const fetchSensorData = async (location: string): Promise<SensorData> => {
-  try {
-    const res = await fetch(`http://192.167.100.30:8000/api/kandang/${location.replace(" ", "_")}`);
-    const json = await res.json();
-
-    return {
-      temperature: json.data.temperature,
-      humidity: json.data.humidity,
-      ammonia: json.data.ammonia,
-      lastUpdate: new Date()
-    };
-  } catch (err) {
-    console.error(`Failed to fetch data for ${location}:`, err);
-    return {
-      temperature: 0,
-      humidity: 0,
-      ammonia: 0,
-      lastUpdate: new Date()
-    };
-  }
-};
-
 export const Dashboard: React.FC = () => {
-  const [farms, setFarms] = useState<Farm[]>([
-    { id: 1, name: 'Kandang 1', data: generateSensorData() },
-    { id: 2, name: 'Kandang 2', data: generateSensorData() },
-    { id: 3, name: 'Kandang 3', data: generateSensorData() }
-  ]);
+  const [farms, setFarms] = useState<Farm[]>([]);
+  const [dailyData, setDailyData] = useState<DailyData[]>([]);
   const { setAlerts } = useAlerts();
+  const { token } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // fungsi untuk update semua kandang
-  const updateAll = async () => {
-    const updated = await Promise.all(
-      farms.map(farm => fetchSensorData(farm.name).then(data => ({ ...farm, data })))
-    );
-    setFarms(updated);
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/company/dashboard-data', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setFarms(data.farms || []);
+        setDailyData(data.daily_data || []);
+        
+        // Generate and set alerts
+        const newAlerts = generateAlerts(data.farms || []);
+        setAlerts(newAlerts);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    }
   };
 
-  // Auto-refresh setiap 5 detik
+  // Auto-refresh every 5 seconds
   useEffect(() => {
-    if (!autoRefresh) return;
-    updateAll(); // initial
-    const newAlerts = generateAlerts(farms);
-    setAlerts(newAlerts);
-    const iv = setInterval(updateAll, 5000);
-    return () => clearInterval(iv);
-  }, [autoRefresh, farms]);
+    fetchDashboardData(); // Initial fetch
+    
+    if (autoRefresh) {
+      const interval = setInterval(fetchDashboardData, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefresh, token]);
 
-  // Manual refresh via tombol
+  // Manual refresh
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    await updateAll();
+    await fetchDashboardData();
     setIsRefreshing(false);
   };
 
-  // Hitung status keseluruhan
+  // Calculate totals from daily data
+  const totals = dailyData.reduce((acc, data) => ({
+    chickens: acc.chickens + (data.total_chickens || 0),
+    feed: acc.feed + (data.total_feed_kg || 0),
+    workers: acc.workers + (data.anak_kandang_count || 0)
+  }), { chickens: 0, feed: 0, workers: 0 });
+
+  // Calculate system status
   const systemStatus = (() => {
-    const all = farms.flatMap(farm => [
-      farm.data.temperature,
-      farm.data.humidity,
-      farm.data.ammonia
-    ]);
-    const warnings = all.filter(v => v === 0 || isNaN(v)).length;
+    const alerts = generateAlerts(farms);
     return {
-      status: warnings === 0 ? 'optimal' : 'warning',
-      warningCount: warnings,
-      totalSensors: all.length
+      status: alerts.destructive.length > 0 ? 'critical' : alerts.warnings.length > 0 ? 'warning' : 'optimal',
+      warningCount: alerts.warnings.length,
+      criticalCount: alerts.destructive.length,
+      totalSensors: farms.length * 3 // 3 sensors per farm
     };
   })();
 
@@ -354,7 +334,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content - Fixed container consistency */}
+      {/* Main Content */}
       <main className="container mx-auto px-6 py-8 max-w-7xl">
         {/* System Overview */}
         <Card className="mb-8 bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200">
@@ -376,12 +356,14 @@ export const Dashboard: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {systemStatus.totalSensors - systemStatus.warningCount}
+                  {systemStatus.totalSensors - systemStatus.warningCount - systemStatus.criticalCount}
                 </div>
                 <div className="text-sm text-gray-600">Normal Readings</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{systemStatus.warningCount}</div>
+                <div className="text-2xl font-bold text-yellow-600">
+                  {systemStatus.warningCount + systemStatus.criticalCount}
+                </div>
                 <div className="text-sm text-gray-600">Alerts</div>
               </div>
             </div>
@@ -402,9 +384,9 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Total Chickens</h3>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">247</div>
-                <div className="text-sm text-green-600 font-medium mb-1">+12 this month</div>
-                <div className="text-xs text-gray-500">Active laying hens</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{totals.chickens}</div>
+                <div className="text-sm text-green-600 font-medium mb-1">Today's count</div>
+                <div className="text-xs text-gray-500">From {totals.workers} workers</div>
               </div>
 
               {/* Feed Consumption */}
@@ -417,44 +399,43 @@ export const Dashboard: React.FC = () => {
                   </div>
                   <h3 className="text-lg font-semibold text-gray-800">Feed Consumption</h3>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">145 kg</div>
-                <div className="text-sm text-blue-600 font-medium mb-1">Normal levels</div>
-                <div className="text-xs text-gray-500">Daily feed usage</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{totals.feed.toFixed(1)} kg</div>
+                <div className="text-sm text-blue-600 font-medium mb-1">Today's usage</div>
+                <div className="text-xs text-gray-500">Across all farms</div>
               </div>
 
-              {/* Health Score */}
+              {/* Active Workers */}
               <div className="flex flex-col items-center text-center">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-red-100">
-                    <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.27 2 8.5C2 5.41 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.08C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.41 22 8.5C22 12.27 18.6 15.36 13.45 20.03L12 21.35Z"/>
-                    </svg>
+                  <div className="p-2 rounded-lg bg-blue-100">
+                    <Activity className="h-5 w-5 text-blue-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-800">Health Score</h3>
+                  <h3 className="text-lg font-semibold text-gray-800">Active Workers</h3>
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">94%</div>
-                <div className="text-sm text-green-600 font-medium mb-1">+2% this week</div>
-                <div className="text-xs text-gray-500">Flock health average</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">{totals.workers}</div>
+                <div className="text-sm text-green-600 font-medium mb-1">Reported today</div>
+                <div className="text-xs text-gray-500">Anak Kandang accounts</div>
               </div>
-
-
             </div>
           </CardContent>
         </Card>
 
-        {/* Grid FarmCard */}
+        {/* Farm Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {farms.map(farm => (
-            <FarmCard
-              key={farm.id}
-              farmId={farm.id}
-              farmName={farm.name}
-              data={farm.data}
-            />
-          ))}
+          {farms.length > 0 ? (
+            farms.map(farm => (
+              <FarmCard key={farm.id} farm={farm} />
+            ))
+          ) : (
+            <Card className="col-span-full">
+              <CardContent className="text-center py-12">
+                <p className="text-gray-500">No farms found. Please contact your administrator.</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Optimal Ranges - Fixed width alignment */}
+        {/* Optimal Ranges */}
         <Card className="bg-white/80 backdrop-blur-sm shadow-lg border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-800">

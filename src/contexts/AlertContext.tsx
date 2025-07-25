@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
 interface Alert {
   farmId: number;
@@ -8,33 +8,32 @@ interface Alert {
   threshold: string;
 }
 
+interface AlertsData {
+  warnings: Alert[];
+  destructive: Alert[];
+}
+
 interface AlertContextType {
-  alerts: {
-    warnings: Alert[];
-    destructive: Alert[];
-  };
-  setAlerts: (alerts: { warnings: Alert[]; destructive: Alert[] }) => void;
+  alerts: AlertsData | null;
+  setAlerts: (alerts: AlertsData) => void;
 }
 
 const AlertContext = createContext<AlertContextType | undefined>(undefined);
 
-export function AlertProvider({ children }: { children: ReactNode }) {
-  const [alerts, setAlerts] = useState<{ warnings: Alert[]; destructive: Alert[] }>({
-    warnings: [],
-    destructive: []
-  });
+export const useAlerts = () => {
+  const context = useContext(AlertContext);
+  if (!context) {
+    throw new Error('useAlerts must be used within an AlertProvider');
+  }
+  return context;
+};
+
+export const AlertProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [alerts, setAlerts] = useState<AlertsData | null>(null);
 
   return (
     <AlertContext.Provider value={{ alerts, setAlerts }}>
       {children}
     </AlertContext.Provider>
   );
-}
-
-export function useAlerts() {
-  const context = useContext(AlertContext);
-  if (context === undefined) {
-    throw new Error('useAlerts must be used within an AlertProvider');
-  }
-  return context;
-}
+};

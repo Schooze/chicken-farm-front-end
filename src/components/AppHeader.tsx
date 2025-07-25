@@ -1,31 +1,27 @@
 //This is AppHeader.tsx
 
 import React, { useState } from 'react';
-import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, PanelLeftOpen } from 'lucide-react';
+import { Activity, RefreshCw, AlertTriangle, AlertCircle, X, CheckCircle, PanelLeftOpen, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSidebar } from '@/components/ui/sidebar';
-import { useAlerts } from '@/contexts/AlertContext'; // Add this import at the top
+import { useAlerts } from '@/contexts/AlertContext';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-
-// Mock data untuk demo - dalam implementasi nyata, ini akan datang dari props atau context
-// const mockFarmAlerts = {
-//   warnings: [
-//     { farmId: 1, farmName: 'Kandang 1', sensor: 'Moisture', value: '66.2%', threshold: '45-65%' },
-//     { farmId: 3, farmName: 'Kandang 3', sensor: 'Temperature', value: '26.8°C', threshold: '18-25°C' }
-//   ],
-//   destructive: [
-//     { farmId: 1, farmName: 'Kandang 1', sensor: 'Temperature', value: '33.4°C', threshold: '18-25°C' },
-//     { farmId: 2, farmName: 'Kandang 2', sensor: 'Ammonia', value: '25.3 ppm', threshold: '0-20 ppm' }
-//   ]
-// };
-
-// interface AlertPopupProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-//   warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
-//   destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
-// }
+interface AlertPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  warnings: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+  destructive: Array<{farmId: number, farmName: string, sensor: string, value: string, threshold: string}>;
+}
 
 const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, destructive }) => {
   if (!isOpen) return null;
@@ -138,13 +134,12 @@ const AlertPopup: React.FC<AlertPopupProps> = ({ isOpen, onClose, warnings, dest
 };
 
 export function AppHeader() {
-  const { alerts } = useAlerts(); // Add this line
+  const { alerts } = useAlerts();
   const { toggleSidebar } = useSidebar();
+  const { user, logout } = useAuth();
   const [showAlerts, setShowAlerts] = useState(false);
 
   // Calculate alert counts
-  // const warningCount = mockFarmAlerts.warnings.length;
-  // const destructiveCount = mockFarmAlerts.destructive.length;
   const warningCount = alerts?.warnings?.length || 0;
   const destructiveCount = alerts?.destructive?.length || 0;
   const totalAlerts = warningCount + destructiveCount;
@@ -212,7 +207,7 @@ export function AppHeader() {
             </div>
           </div>
 
-          {/* Right Section: Status + Controls */}
+          {/* Right Section: Status + User Menu */}
           <div className="flex items-center gap-4">
             {/* System Status - Clickable */}
             <button
@@ -238,6 +233,32 @@ export function AppHeader() {
                 </div>
               )}
             </button>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 px-2">
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="text-sm">{user?.username}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.username}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.account_type === 'company' ? 'Company Account' : 
+                       user?.account_type === 'admin' ? 'Administrator' : 'Anak Kandang'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-red-600 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
