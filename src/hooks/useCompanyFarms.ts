@@ -1,6 +1,9 @@
 // hooks/useCompanyFarms.ts
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '../config';
+
+
 
 export interface Farm {
   id: number;
@@ -35,7 +38,7 @@ export const useCompanyFarms = () => {
   const fetchFarms = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://192.168.100.30:8000/api/auth/company/farms', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/company/farms`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

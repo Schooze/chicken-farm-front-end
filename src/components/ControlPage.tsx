@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Fan, Utensils, Power, Settings, Activity, Clock, Snowflake, Loader2, AlertCircle } from 'lucide-react';
 import { useCompanyFarms, FarmWithControls, FarmControls } from '@/hooks/useCompanyFarms';
 
+
 export const ControlPage: React.FC = () => {
   const { farms, loading, error, updateFarmControls } = useCompanyFarms();
   const [selectedFarmId, setSelectedFarmId] = useState<string>('');
