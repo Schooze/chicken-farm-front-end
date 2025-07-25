@@ -1,90 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Fan, Utensils, Power, Settings, Activity, Clock, Snowflake } from 'lucide-react';
-
-interface FarmControls {
-  fan: boolean;
-  fanFrequency: number;
-  feeder: boolean;
-  coolingPad1: boolean;
-  coolingPad2: boolean;
-  lastFanToggle?: Date;
-  lastFeederToggle?: Date;
-  lastCoolingPad1Toggle?: Date;
-  lastCoolingPad2Toggle?: Date;
-}
-
-interface Farm {
-  id: string;
-  name: string;
-  controls: FarmControls;
-}
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Fan, Utensils, Power, Settings, Activity, Clock, Snowflake, Loader2, AlertCircle } from 'lucide-react';
+import { useCompanyFarms, FarmWithControls, FarmControls } from '@/hooks/useCompanyFarms';
 
 export const ControlPage: React.FC = () => {
-  const [farms, setFarms] = useState<Farm[]>([
-    { 
-      id: 'alpha', 
-      name: 'Farm Alpha', 
-      controls: { fan: false, fanFrequency: 0, feeder: false, coolingPad1: false, coolingPad2: false } 
-    },
-    { 
-      id: 'beta', 
-      name: 'Farm Beta', 
-      controls: { fan: true, fanFrequency: 30, feeder: false, coolingPad1: true, coolingPad2: false } 
-    },
-    { 
-      id: 'gamma', 
-      name: 'Farm Gamma', 
-      controls: { fan: false, fanFrequency: 0, feeder: true, coolingPad1: false, coolingPad2: true } 
-    }
-  ]);
-
-  const [selectedFarmId, setSelectedFarmId] = useState<string>('alpha');
+  const { farms, loading, error, updateFarmControls } = useCompanyFarms();
+  const [selectedFarmId, setSelectedFarmId] = useState<string>('');
   const [tempFrequency, setTempFrequency] = useState<string>('');
-  const selectedFarm = farms.find(farm => farm.id === selectedFarmId);
+
+  // Auto-select first farm when farms are loaded
+  useEffect(() => {
+    if (farms.length > 0 && !selectedFarmId) {
+      setSelectedFarmId(farms[0].id.toString());
+    }
+  }, [farms, selectedFarmId]);
+
+  const selectedFarm = farms.find(farm => farm.id.toString() === selectedFarmId);
 
   const handleControlToggle = (controlType: 'fan' | 'feeder' | 'coolingPad1' | 'coolingPad2') => {
-    setFarms(currentFarms => 
-      currentFarms.map(farm => 
-        farm.id === selectedFarmId 
-          ? {
-              ...farm,
-              controls: {
-                ...farm.controls,
-                [controlType]: !farm.controls[controlType],
-                // Ketika fan dimatikan, set frequency ke 0
-                ...(controlType === 'fan' && farm.controls.fan ? { fanFrequency: 0 } : {}),
-                [`last${controlType.charAt(0).toUpperCase() + controlType.slice(1)}Toggle`]: new Date()
-              }
-            }
-          : farm
-      )
-    );
+    if (!selectedFarm) return;
+
+    const currentValue = selectedFarm.controls[controlType];
+    const updates: Partial<FarmControls> = {
+      [controlType]: !currentValue,
+      [`last${controlType.charAt(0).toUpperCase() + controlType.slice(1)}Toggle`]: new Date()
+    };
+
+    // When fan is turned off, set frequency to 0
+    if (controlType === 'fan' && currentValue) {
+      updates.fanFrequency = 0;
+    }
+
+    updateFarmControls(selectedFarm.id, updates);
   };
 
   const handleFrequencyChange = (value: number) => {
+    if (!selectedFarm) return;
+
     // Ensure value is within 0-50Hz range
     const clampedValue = Math.max(0, Math.min(50, value));
     
-    setFarms(currentFarms => 
-      currentFarms.map(farm => 
-        farm.id === selectedFarmId 
-          ? {
-              ...farm,
-              controls: {
-                ...farm.controls,
-                fanFrequency: clampedValue,
-                // Fan hidup hanya jika frequency > 0
-                fan: clampedValue > 0,
-                lastFanToggle: new Date()
-              }
-            }
-          : farm
-      )
-    );
+    updateFarmControls(selectedFarm.id, {
+      fanFrequency: clampedValue,
+      // Fan is on only if frequency > 0
+      fan: clampedValue > 0,
+      lastFanToggle: new Date()
+    });
   };
 
   const handleFrequencyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,11 +75,57 @@ export const ControlPage: React.FC = () => {
   const getStatusColor = (isActive: boolean) => isActive ? 'success' : 'secondary';
   const getStatusText = (isActive: boolean) => isActive ? 'ON' : 'OFF';
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedFarm) {
       setTempFrequency(selectedFarm.controls.fanFrequency.toString());
     }
   }, [selectedFarmId, selectedFarm?.controls.fanFrequency]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <p className="text-gray-600">Loading farm data...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Error loading farm data: {error}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  // No farms state
+  if (farms.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Alert className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              No farms found for your company. Please contact your administrator to set up farms.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-6">
@@ -125,6 +136,9 @@ export const ControlPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Farm Control Center</h1>
         </div>
         <p className="text-gray-600">Control fans, feeders, and cooling systems for all chicken farms</p>
+        <p className="text-sm text-gray-500 mt-1">
+          Managing {farms.length} farm{farms.length !== 1 ? 's' : ''} • Total fans: {farms.reduce((sum, farm) => sum + farm.fan_count, 0)}
+        </p>
       </div>
 
       {/* Farm Selection and Status Overview - Side by Side */}
@@ -145,12 +159,18 @@ export const ControlPage: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {farms.map((farm) => (
-                    <SelectItem key={farm.id} value={farm.id}>
+                    <SelectItem key={farm.id} value={farm.id.toString()}>
                       {farm.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {selectedFarm && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <p>Location: {selectedFarm.location}</p>
+                  <p>Fans: {selectedFarm.fan_count}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -165,17 +185,18 @@ export const ControlPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {farms.map((farm) => (
                   <div 
                     key={farm.id} 
                     className={`p-4 rounded-lg border transition-all duration-300 ${
-                      farm.id === selectedFarmId 
+                      farm.id.toString() === selectedFarmId 
                         ? 'border-blue-500 bg-blue-50 shadow-md' 
                         : 'border-gray-200 bg-white/50'
                     }`}
                   >
-                    <h3 className="font-semibold text-gray-900 mb-3">{farm.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1">{farm.name}</h3>
+                    <p className="text-xs text-gray-500 mb-3">{farm.location} • {farm.fan_count} fans</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -247,8 +268,8 @@ export const ControlPage: React.FC = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-4 rounded-lg bg-blue-50">
                 <div>
-                  <p className="font-medium text-gray-900">Ventilation Fan</p>
-                  <p className="text-sm text-gray-600">Controls air circulation</p>
+                  <p className="font-medium text-gray-900">Ventilation Fans</p>
+                  <p className="text-sm text-gray-600">Controls air circulation ({selectedFarm.fan_count} fans available)</p>
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.fan) as any}
@@ -310,7 +331,7 @@ export const ControlPage: React.FC = () => {
                 </div>
                 
                 <p className="text-xs text-gray-500">
-                  Range: 0-50Hz. Values outside this range will be automatically adjusted.
+                  Range: 0-50Hz. Controls all {selectedFarm.fan_count} fans simultaneously.
                 </p>
               </div>
 
@@ -335,7 +356,7 @@ export const ControlPage: React.FC = () => {
               <div className="flex items-center justify-between p-4 rounded-lg bg-orange-50">
                 <div>
                   <p className="font-medium text-gray-900">Automatic Feeder</p>
-                  <p className="text-sm text-gray-600">Controls food dispensing</p>
+                  <p className="text-sm text-gray-600">Controls food dispensing for {selectedFarm.name}</p>
                 </div>
                 <Badge 
                   variant={getStatusColor(selectedFarm.controls.feeder) as any}
@@ -380,7 +401,7 @@ export const ControlPage: React.FC = () => {
               <div className="flex items-center justify-between p-4 rounded-lg bg-cyan-50">
                 <div>
                   <p className="font-medium text-gray-900">Evaporative Cooling</p>
-                  <p className="text-sm text-gray-600">Controls temperature reduction</p>
+                  <p className="text-sm text-gray-600">Controls temperature reduction for {selectedFarm.name}</p>
                 </div>
                 <div className="flex gap-2">
                   {selectedFarm.controls.coolingPad1 && (
@@ -479,6 +500,6 @@ export const ControlPage: React.FC = () => {
       `}</style>
     </div>
   );
-}
+};
 
 export default ControlPage;
