@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Building2, Users, Warehouse, Fan, Plus, Trash2, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '../config';
+
 
 interface Company {
   id: number;
@@ -54,7 +56,7 @@ const AdminPage: React.FC = () => {
 
   const fetchAdminData = async () => {
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/admin/stats', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -71,7 +73,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch(`http://192.168.100.30:8000/api/auth/admin/companies?name=${encodeURIComponent(newCompanyName)}`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/companies?name=${encodeURIComponent(newCompanyName)}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -97,7 +99,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/auth/admin/users', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/users`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -128,7 +130,7 @@ const AdminPage: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/auth/admin/farms', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/farms`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

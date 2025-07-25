@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RefreshCw, Settings, AlertTriangle, Thermometer, Droplets, Wind, Activity } from 'lucide-react';
 import { useAlerts } from '@/contexts/AlertContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '../config';
+
 
 export interface SensorData {
   temperature: number;
@@ -246,7 +248,7 @@ export const Dashboard: React.FC = () => {
   // Fetch dashboard data
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/company/dashboard-data', {
+      const response = await fetch(`${API_BASE_URL}/api/company/dashboard-data`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Warehouse, Egg, Package, CheckCircle, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '../config';
+
 
 interface Farm {
   id: number;
@@ -46,7 +48,7 @@ const AnakKandangPage: React.FC = () => {
 
   const fetchFarms = async () => {
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/company/farms', {
+      const response = await fetch(`${API_BASE_URL}/api/company/farms`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -72,7 +74,7 @@ const AnakKandangPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/auth/anak-kandang/manual-input', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/anak-kandang/manual-input`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
