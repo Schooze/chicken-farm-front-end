@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from './config'; // ✅ Import base URL
 
 interface User {
   id: number;
@@ -32,7 +33,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Check for existing token on mount
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (authToken: string) => {
     try {
-      const response = await fetch('http://192.168.100.30:8000/api/auth/users/me', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/users/me`, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -55,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         setToken(authToken);
       } else {
-        // Token is invalid
         localStorage.removeItem('token');
         setUser(null);
         setToken(null);
@@ -75,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     formData.append('username', username);
     formData.append('password', password);
 
-    const response = await fetch('http://192.168.100.30:8000/api/auth/token', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/token`, {
       method: 'POST',
       body: formData,
     });
@@ -85,10 +84,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('token', data.access_token);
       setToken(data.access_token);
       
-      // Fetch user data
       await fetchUserData(data.access_token);
       
-      // Redirect based on account type
       switch (data.account_type) {
         case 'admin':
           navigate('/admin');
